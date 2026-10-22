@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Retrait des diplômes BEPC</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#17806a">
+<link rel="icon" href="icon-192.png">
 <style>
 :root{--bg:#eef3f1;--card:#fff;--ink:#12302a;--mute:#5d726b;--line:#dbe5e1;--acc:#17806a;--onacc:#fff;--acc2:#e6f3ef;--ok:#14705c;--warn:#a85d0a;--bad:#b3261e;--sh:0 1px 2px rgba(10,40,32,.06),0 4px 16px rgba(10,40,32,.05)}
 @media (prefers-color-scheme:dark){:root{--bg:#0c1714;--card:#14241f;--ink:#e7f1ed;--mute:#9bb2aa;--line:#26403a;--acc:#46c4a3;--onacc:#06241c;--acc2:#1b332c;--ok:#46c4a3;--warn:#f0b36a;--bad:#ff8a80;--sh:none}}
@@ -50,6 +53,8 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 @media (prefers-color-scheme:dark){.tn{color:#7fb0ff}}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);color:#fff;background:var(--ink);padding:10px 16px;border-radius:10px;z-index:50;max-width:90%}
 @media print{.tn{color:#000}}
+.ln{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--line);font-size:1.05rem}
+.tag.av{color:var(--ok)}.tag.rt{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -62,6 +67,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <p class="err" id="lerr" role="alert"></p><button id="lb" style="width:100%" hidden></button></section></main>
 <main id="app" hidden>
 <nav id="tabs"><button data-v="d">Diplômes</button><button data-v="b">Bilans</button><button data-v="x" id="tx" data-adm>Doublons</button><button data-v="u" data-adm>Comptes</button><button data-v="j" data-adm>Journal</button></nav>
+<div id="v-s" hidden><section class="card"><strong style="font-size:1.15rem">Consultation d'un diplôme</strong><div style="margin-top:12px"><label for="sq">Nom ou n° de table</label><input id="sq" style="font-size:1.1rem" placeholder="Ex. KONE ou 23 43 02 285" autocomplete="off"></div><div id="sr" style="margin-top:14px"></div></section></div>
 <div id="v-d">
 <div class="stats"><div class="stat"><b id="s0">0</b><span>Diplômes (session choisie)</span></div><div class="stat w"><b id="s1">0</b><span>Disponibles</span></div><div class="stat"><b id="s2">0</b><span>Retirés</span></div><div class="stat"><b id="s3">0 %</b><span>Taux de retrait</span><div class="pg"><i id="sp"></i></div></div></div>
 <details class="card" id="addc"><summary>+ Ajouter un diplômé</summary>
@@ -120,6 +126,7 @@ function toast(m,bad){var t=$("toast");t.textContent=m;t.style.background=bad?"v
 function ERR(e){toast((e&&e.message)||"Erreur. Vérifiez la connexion internet.",true)}
 function ADM(){return !!ME&&ME.role==="admin"}
 function CAN(){return !!ME&&(ME.role==="admin"||!!ME.can_remit)}
+function SIMPLE(){return !!ME&&ME.role!=="admin"&&!ME.can_remit}
 function isR(p){return !!(p.r_date||p.r_par||p.r_pc)}
 async function LOG(a,d){try{await sb.from("journal").insert({usr:ME.login,action:a,detail:d||""})}catch(e){}}
 async function loadAll(t){var a=[],f=0;for(;;){var r=await sb.from(t).select("*").order("id").range(f,f+999);if(r.error)throw r.error;a=a.concat(r.data);if(r.data.length<1000)break;f+=1000}return a}
@@ -171,7 +178,16 @@ function rU(){$("ulist").innerHTML=P.map(function(x){var me=ME&&x.id===ME.id;
  return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+(x.role==="admin"?"Administrateur":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button>")+"</td></tr>"}).join("")}
 function rJ(){var q=norm($("jq").value).toLowerCase();var r=L.filter(function(l){return((l.usr||"")+" "+l.action+" "+(l.detail||"")).toLowerCase().indexOf(q)>-1});
  $("jb").innerHTML=r.length?r.slice(0,300).map(function(l){return"<tr><td style='white-space:nowrap'>"+esc(new Date(l.at).toLocaleString("fr-FR"))+"</td><td>"+esc(l.usr)+"</td><td>"+esc(l.action)+"</td><td>"+esc(l.detail)+"</td></tr>"}).join(""):'<tr><td colspan="4" style="color:var(--mute)">Journal vide.</td></tr>'}
+function sn(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
+function rS(){var q=sn($("sq").value).trim(),o=$("sr");
+ if(q.length<2){o.innerHTML='<p style="color:var(--mute)">Saisissez au moins 2 lettres du nom ou le n° de table.</p>';return}
+ var tq=q.replace(/\s+/g,""),w=q.split(/\s+/);
+ var r=D.filter(function(p){var n=sn(p.nom),t=sn(p.tab).replace(/\s+/g,"");return t.indexOf(tq)>-1||w.every(function(x){return n.indexOf(x)>-1})});
+ o.innerHTML=r.length?r.slice(0,10).map(function(p){var x=isR(p);return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(p.tab)+'</span><span class="tag '+(x?"rt":"av")+'">'+(x?"Déjà retiré":"Disponible")+"</span></div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez la recherche.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
+$("sq").oninput=rS;
 function render(){
+ if(SIMPLE()){$("tabs").hidden=true;["d","b","x","u","j"].forEach(function(v){$("v-"+v).hidden=true});$("v-s").hidden=false;rS();return}
+ $("tabs").hidden=false;$("v-s").hidden=true;
  if(!ADM()&&(TAB==="x"||TAB==="j"||TAB==="u"))TAB="d";
  var dn=ADM()?dups().length:0;$("tx").textContent="Doublons"+(dn?" ("+dn+")":"");
  Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){var v=b.getAttribute("data-v");b.className=v===TAB?"on":"";if(b.hasAttribute("data-adm"))b.hidden=!ADM()});
@@ -314,5 +330,6 @@ $("lb").onclick=async function(){var btn=this,lg=nl($("lu").value),pw=$("lp").va
 })();
 })();
 </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})</script>
 </body>
 </html>
