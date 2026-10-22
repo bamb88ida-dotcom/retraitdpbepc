@@ -59,6 +59,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 .dech{border:2px solid #000;padding:14px 22px;margin:0 0 14px;page-break-inside:avoid;font:14px/1.6 Georgia,serif;color:#000;background:#fff}
 .dech .top{text-align:right;font-size:.92rem}.dech h2{margin:6px 0 10px;font-size:1.05rem;text-align:center}.dech .sig{display:flex;justify-content:space-between;margin-top:30px}
 .cut{border-top:2px dashed #666;margin:4px 0 14px}
+.rap{color:#000;background:#fff;font:15px/1.6 Georgia,serif}.rap h2{text-align:center;margin:24px 0 4px}.rap table{min-width:0;width:100%;border-collapse:collapse;margin-top:18px}.rap th,.rap td{border:1px solid #000;padding:10px;text-align:center;color:#000;background:#fff;position:static}
 </style>
 </head>
 <body>
@@ -67,7 +68,8 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <main id="lg" style="max-width:380px"><section class="card" style="margin-top:40px"><strong id="lt" style="font-size:1.1rem">Chargement...</strong>
 <div id="lf"><div style="margin-top:12px"><label for="lu">Identifiant</label><input id="lu" autocomplete="username" autocapitalize="none"></div>
 <div style="margin-top:10px"><label for="lp">Mot de passe</label><input id="lp" type="password" autocomplete="current-password"></div>
-<div id="lc" style="margin-top:10px" hidden><label for="lc2">Confirmer le mot de passe</label><input id="lc2" type="password"></div></div>
+<div id="lc" style="margin-top:10px" hidden><label for="lc2">Confirmer le mot de passe</label><input id="lc2" type="password"></div>
+<div id="ln" style="margin-top:10px" hidden><label for="lnn">Nom et prénoms</label><input id="lnn"></div></div>
 <p class="err" id="lerr" role="alert"></p><button id="lb" style="width:100%" hidden></button></section></main>
 <main id="app" hidden>
 <nav id="tabs"><button data-v="d">Diplômes</button><button data-v="b">Bilans</button><button data-v="x" id="tx" data-chef>Doublons</button><button data-v="u" data-adm>Comptes</button><button data-v="j" data-adm>Journal</button></nav>
@@ -86,13 +88,13 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <div class="tw"><table><thead><tr><th>Session</th><th>N° de table</th><th>Nom et prénoms</th><th>Date et lieu de naissance</th><th>Statut</th><th>Effectué par</th><th>N° de pièce</th><th>Contact</th><th>Agent</th><th></th></tr></thead><tbody id="body"></tbody></table></div>
 <p id="more" style="color:var(--mute);margin:10px 0 0"></p></section></div>
 <div id="v-b" hidden><section class="card"><div class="bar"><div><label for="bf">Période : du</label><input id="bf" type="date"></div><div><label for="bt">au</label><input id="bt" type="date"></div>
-<button class="g" data-p="w">Cette semaine</button><button class="g" data-p="m">Ce mois</button><button class="g" data-p="pm">Mois dernier</button><button id="bp">Imprimer le bilan</button></div><div id="bil"></div></section></div>
+<button class="g" data-p="w">Cette semaine</button><button class="g" data-p="m">Ce mois</button><button class="g" data-p="pm">Mois dernier</button><button class="g" id="bh">Rapport hebdomadaire</button><button id="bp">Imprimer le bilan</button></div><div id="bil"></div></section></div>
 <div id="v-x" hidden><section class="card"><strong>Doublons possibles</strong><p style="color:var(--mute);margin:4px 0 12px">Mêmes nom et prénoms (dans n'importe quel ordre) et même date de naissance, toutes sessions confondues. Vérifiez puis corrigez ou supprimez.</p><div id="dup"></div></section></div>
 <div id="v-u" hidden><section class="card"><strong>Créer un compte</strong>
-<div class="grid"><div><label for="nu">Identifiant (lettres, chiffres, . - _)</label><input id="nu" autocapitalize="none"></div><div><label for="np">Mot de passe (6 caractères minimum)</label><input id="np"></div><div><label for="nr">Rôle</label><select id="nr"><option value="agent">Agent</option><option value="chef">Chef de service</option><option value="admin">Administrateur</option></select></div></div>
+<div class="grid"><div><label for="nn">Nom et prénoms</label><input id="nn"></div><div><label for="nu">Identifiant (lettres, chiffres, . - _)</label><input id="nu" autocapitalize="none"></div><div><label for="np">Mot de passe (6 caractères minimum)</label><input id="np"></div><div><label for="nr">Rôle</label><select id="nr"><option value="agent">Agent</option><option value="chef">Chef de service</option><option value="admin">Administrateur</option></select></div></div>
 <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="nrem" style="width:auto"> Agent autorisé à remettre les diplômes</label>
 <p class="err" id="ue" role="alert"></p><button id="ua">Créer le compte</button></section>
-<section class="card"><strong>Comptes existants</strong><div class="tw" style="margin-top:8px"><table style="min-width:600px"><thead><tr><th>Identifiant</th><th>Rôle</th><th>Remise</th><th>Accès</th><th></th></tr></thead><tbody id="ulist"></tbody></table></div></section></div>
+<section class="card"><strong>Comptes existants</strong><div class="tw" style="margin-top:8px"><table style="min-width:600px"><thead><tr><th>Identifiant</th><th>Nom et prénoms</th><th>Rôle</th><th>Remise</th><th>Accès</th><th></th></tr></thead><tbody id="ulist"></tbody></table></div></section></div>
 <div id="v-j" hidden><section class="card"><div class="bar"><div class="f"><label for="jq">Rechercher dans le journal</label><input id="jq" type="search" placeholder="Nom, agent, action..."></div></div><div class="tw"><table><thead><tr><th>Date et heure</th><th>Utilisateur</th><th>Action</th><th>Détail</th></tr></thead><tbody id="jb"></tbody></table></div></section></div>
 </main>
 <dialog id="dlg"><div><strong id="dt">Remise du diplôme</strong>
@@ -184,7 +186,7 @@ function bilanHtml(){
 function rB(){if(!$("bf").value){var n=new Date();$("bf").value=lday(new Date(n.getFullYear(),n.getMonth(),1));$("bt").value=lday(n)}$("bil").innerHTML=bilanHtml()}
 function rX(){var g=dups();$("dup").innerHTML=g.length?g.map(function(a){return'<div class="tw" style="margin-bottom:14px;max-height:none"><table style="min-width:700px"><tbody>'+a.map(function(p){return rowHtml(p,false)}).join("")+"</tbody></table></div>"}).join(""):'<p style="color:var(--mute)">Aucun doublon détecté.</p>'}
 function rU(){$("ulist").innerHTML=P.map(function(x){var me=ME&&x.id===ME.id;
- return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+(x.role==="admin"?"Administrateur":x.role==="chef"?"Chef de service":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.role==="agent"&&x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='p' data-i='"+x.id+"'>Nouveau mot de passe</button> <button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button> <button class='g sm' data-u='s' data-i='"+x.id+"'>Supprimer</button>")+"</td></tr>"}).join("")}
+ return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+esc(x.full_name)+"</td><td>"+(x.role==="admin"?"Administrateur":x.role==="chef"?"Chef de service":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.role==="agent"&&x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+"<button class='g sm' data-u='n' data-i='"+x.id+"'>Nom</button> "+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='p' data-i='"+x.id+"'>Nouveau mot de passe</button> <button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button> <button class='g sm' data-u='s' data-i='"+x.id+"'>Supprimer</button>")+"</td></tr>"}).join("")}
 function rJ(){var q=norm($("jq").value).toLowerCase();var r=L.filter(function(l){return((l.usr||"")+" "+l.action+" "+(l.detail||"")).toLowerCase().indexOf(q)>-1});
  $("jb").innerHTML=r.length?r.slice(0,300).map(function(l){return"<tr><td style='white-space:nowrap'>"+esc(new Date(l.at).toLocaleString("fr-FR"))+"</td><td>"+esc(l.usr)+"</td><td>"+esc(l.action)+"</td><td>"+esc(l.detail)+"</td></tr>"}).join(""):'<tr><td colspan="4" style="color:var(--mute)">Journal vide.</td></tr>'}
 function sn(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
@@ -260,9 +262,14 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=norm($("e_tab").value)
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
 function print(p){
  var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
- var h='<div class="dech"><div class="top">Soubré, le '+dt+'<br>Agent de remise : <b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(p.tab)+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'agent de remise<br><br>(signature et cachet)</div></div></div>';
+ var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(p.tab)+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br>(signature et cachet)<br><br><b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div></div></div>';
  $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
+$("bh").onclick=function(){var f=$("bf").value,e=$("bt").value;
+ if(!f||!e){toast("Choisissez les dates de début et de fin de la semaine.",true);return}
+ var n=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&p.r_date>=f&&p.r_date<=e}).length,d=new Date();
+ $("pr").innerHTML='<div class="rap"><div style="text-align:right">Soubré, le '+("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear()+'</div><h2>Rapport hebdomadaire</h2><p style="text-align:center">du '+fd(f)+" au "+fd(e)+'</p><table><thead><tr><th style="width:12%">N°</th><th>Libellé</th><th style="width:26%">Nombre de retrait</th></tr></thead><tbody><tr><td>01</td><td>Retrait de diplôme BEPC</td><td>'+n+"</td></tr></tbody></table></div>";window.print()};
 $("bp").onclick=function(){$("pr").innerHTML="<h2>Bilan des retraits de diplômes BEPC</h2><p style='text-align:center'>Édité le "+new Date().toLocaleDateString("fr-FR")+" par "+esc(ME.login)+"</p>"+bilanHtml();window.print()};
+function ph(v){var t=norm(v);return /^\d{9}$/.test(t)?"0"+t:t}
 function iso(d){if(d instanceof Date&&!isNaN(d)){var x=new Date(d.getTime()+43200000);return lday(x)}
  var m=String(d||"").match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);return m?m[3]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2):norm(d)}
 $("imp").onclick=function(){if(!window.XLSX){toast("Import Excel indisponible : module non chargé (connexion internet).",true);return}$("file").click()};
@@ -276,7 +283,7 @@ $("file").onchange=async function(){var inp=this,f=inp.files[0];if(!f)return;
    var ix={c:[]};rows[hi].forEach(function(c,j){var h=norm(c).toUpperCase();
     if(/NOM ET PRENOM/.test(h))ix.n=j;else if(/TABLE/.test(h))ix.t=j;else if(/NAISSANCE/.test(h))ix.b=j;else if(/DATE DE RETRAIT/.test(h))ix.d=j;else if(/EFFECTU/.test(h))ix.e=j;else if(/PIECE|IDENTIT/.test(h))ix.p=j;else if(/RESTE/.test(h))ix.k=j;else if(/CONTACT/.test(h))ix.c.push(j)});
    rows.slice(hi+1).forEach(function(r){var nm=norm(r[ix.n]);if(!nm)return;var t=norm(r[ix.t]);if(!t){noTab++;return}
-    R.push({ses:y,tab:t,nom:nm,nai:norm(r[ix.b]),reste:ix.k==null?"":norm(r[ix.k]),r_date:nul(iso(r[ix.d])),r_par:nul(r[ix.e]),r_pc:nul(r[ix.p]),r_c1:nul(r[ix.c[0]]),r_c2:nul(r[ix.c[1]])})})});
+    R.push({ses:y,tab:t,nom:nm,nai:norm(r[ix.b]),reste:ix.k==null?"":norm(r[ix.k]),r_date:nul(iso(r[ix.d])),r_par:nul(r[ix.e]),r_pc:nul(r[ix.p]),r_c1:nul(ph(r[ix.c[0]])),r_c2:nul(ph(r[ix.c[1]]))})})});
   if(!R.length){toast("Aucune ligne à importer (feuilles « SESSION 20XX » avec N° de table).",true);inp.value="";return}
   toast("Import en cours, patientez...");var add=0;
   for(var i=0;i<R.length;i+=500){var q=await sb.from("diplomes").upsert(R.slice(i,i+500),{onConflict:"ses,tab",ignoreDuplicates:true}).select("id");if(q.error)throw q.error;add+=q.data.length}
@@ -292,18 +299,20 @@ $("exp").onclick=function(){if(!window.XLSX){toast("Export Excel indisponible (c
  XLSX.writeFile(wb,"RETRAITS_BEPC.xlsx");LOG("Export Excel","")};
 $("ua").onclick=async function(){var E=$("ue"),lg=nl($("nu").value),pw=$("np").value,ro=$("nr").value;
  if(!/^[a-z0-9._-]+$/.test(lg)){E.textContent="Identifiant : lettres, chiffres, point, tiret ou _ (sans accent ni espace).";return}
+ if(!norm($("nn").value)){E.textContent="Indiquez le nom et prénoms.";return}
  if(pw.length<6){E.textContent="Mot de passe : 6 caractères minimum.";return}
  this.disabled=true;
  try{var c2=supabase.createClient(C.url,C.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   var s=await c2.auth.signUp({email:mail(lg),password:pw});
   if(s.error){E.textContent=/already/i.test(s.error.message)?"Cet identifiant existe déjà.":s.error.message;return}
   if(!s.data.user){E.textContent="Création impossible.";return}
-  var i=await sb.from("profiles").insert({id:s.data.user.id,login:lg,role:ro,can_remit:ro==="agent"&&$("nrem").checked});
+  var i=await sb.from("profiles").insert({id:s.data.user.id,login:lg,full_name:norm($("nn").value),role:ro,can_remit:ro==="agent"&&$("nrem").checked});
   if(i.error){E.textContent=i.error.message;return}
-  E.textContent="";LOG("Création de compte",lg+" ("+ro+")");$("nu").value="";$("np").value="";$("nrem").checked=false;toast("Compte « "+lg+" » créé.");await refresh()
+  E.textContent="";LOG("Création de compte",lg+" ("+ro+")");$("nn").value="";$("nu").value="";$("np").value="";$("nrem").checked=false;toast("Compte « "+lg+" » créé.");await refresh()
  }catch(x){E.textContent=x.message||"Erreur"}finally{this.disabled=false}};
 $("ulist").onclick=async function(e){var k=e.target.getAttribute("data-u"),id=e.target.getAttribute("data-i");if(!k)return;
  var x=P.filter(function(u){return u.id===id})[0];if(!x)return;
+ if(k==="n"){var nn=prompt("Nom et prénoms pour « "+x.login+" » :",x.full_name||"");if(nn===null)return;nn=norm(nn);if(!nn){toast("Le nom ne peut pas être vide.",true);return}var q3=await sb.from("profiles").update({full_name:nn}).eq("id",id);if(q3.error){ERR(q3.error);return}if(ME&&x.id===ME.id){ME.full_name=nn;setWho()}LOG("Nom du compte modifié",x.login+" : "+nn);await refresh();return}
  if(k==="p"){await resetPw(x);return}
  if(k==="s"){if(confirm("Supprimer définitivement le compte « "+x.login+" » ?\nCette personne ne pourra plus se connecter.")){var rr=await sb.rpc("admin_delete_user",{p_id:x.id});if(rr.error){ERR(rr.error);return}toast("Compte « "+x.login+" » supprimé.");await refresh()}return}
  var u=k==="r"?{can_remit:!x.can_remit}:{active:!x.active};
@@ -319,25 +328,26 @@ $("pw").onclick=async function(){var p=prompt("Nouveau mot de passe (6 caractèr
  var r=await sb.auth.updateUser({password:p});if(r.error)ERR(r.error);else toast("Mot de passe modifié.")};
 $("lo").onclick=async function(){clearInterval(iv);await sb.auth.signOut();D=[];P=[];L=[];ME=null;$("app").hidden=true;$("ub").hidden=true;await toLogin()};
 function showLogin(m,first,hideForm){ME=null;$("lg").hidden=false;$("app").hidden=true;$("ub").hidden=true;
- $("lt").textContent=first?"Créer le compte administrateur":"Connexion";$("lc").hidden=!first;$("lf").hidden=!!hideForm;$("lb").hidden=!!hideForm;
+ $("lt").textContent=first?"Créer le compte administrateur":"Connexion";$("lc").hidden=!first;$("ln").hidden=!first;$("lf").hidden=!!hideForm;$("lb").hidden=!!hideForm;
  $("lb").textContent=first?"Créer le compte":"Se connecter";$("lb").setAttribute("data-first",first?"1":"");$("lp").value="";$("lc2").value="";$("lerr").textContent=m||""}
 async function toLogin(m){var r=await sb.rpc("has_admin");if(r.error){showLogin("Base de données non prête : exécutez le script SQL dans Supabase. ("+r.error.message+")",false,true);return}showLogin(m,!r.data)}
+function setWho(){$("who").textContent=(ME.full_name||ME.login)+" ("+(ADM()?"administrateur":CHEF()?"chef de service":ME.can_remit?"agent, remise autorisée":"agent")+")"}
 async function enter(){
  var u=(await sb.auth.getUser()).data.user;if(!u){await toLogin();return}
  var r=await sb.from("profiles").select("*").eq("id",u.id).maybeSingle();
  if(r.error||!r.data||!r.data.active){await sb.auth.signOut();await toLogin("Ce compte n'est pas autorisé. Contactez l'administrateur.");return}
  ME=r.data;$("lg").hidden=true;$("app").hidden=false;$("ub").hidden=false;
- $("who").textContent=ME.login+" ("+(ADM()?"administrateur":CHEF()?"chef de service":ME.can_remit?"agent, remise autorisée":"agent")+")";
+ setWho();
  SEL=null;TAB="d";await refresh();LOG("Connexion","");clearInterval(iv);iv=setInterval(function(){if(ME&&!document.querySelector("dialog[open]"))refresh()},60000)}
 $("lb").onclick=async function(){var btn=this,lg=nl($("lu").value),pw=$("lp").value,first=!!btn.getAttribute("data-first"),E=$("lerr");
  if(!lg||!pw){E.textContent="Entrez l'identifiant et le mot de passe.";return}
  if(!/^[a-z0-9._-]+$/.test(lg)){E.textContent="Identifiant : lettres, chiffres, point, tiret ou _ (sans accent ni espace).";return}
  btn.disabled=true;
  try{
-  if(first){if(pw.length<8){E.textContent="Mot de passe : 8 caractères minimum.";return}if(pw!==$("lc2").value){E.textContent="Les deux mots de passe sont différents.";return}
+  if(first){if(pw.length<8){E.textContent="Mot de passe : 8 caractères minimum.";return}if(pw!==$("lc2").value){E.textContent="Les deux mots de passe sont différents.";return}if(!norm($("lnn").value)){E.textContent="Indiquez votre nom et prénoms.";return}
    var s=await sb.auth.signUp({email:mail(lg),password:pw});if(s.error)throw s.error;
    if(!s.data.session)throw new Error("Dans Supabase, désactivez « Confirm email » (Authentication > Sign In / Providers > Email).");
-   var i=await sb.from("profiles").insert({id:s.data.user.id,login:lg,role:"admin",can_remit:true});if(i.error)throw i.error}
+   var i=await sb.from("profiles").insert({id:s.data.user.id,login:lg,full_name:norm($("lnn").value),role:"admin",can_remit:true});if(i.error)throw i.error}
   else{var r=await sb.auth.signInWithPassword({email:mail(lg),password:pw});if(r.error){E.textContent="Identifiant ou mot de passe incorrect.";return}}
   await enter()
  }catch(e){E.textContent=e.message||"Erreur de connexion."}finally{btn.disabled=false}};
