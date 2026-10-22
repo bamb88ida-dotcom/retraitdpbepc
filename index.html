@@ -60,6 +60,14 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 .dech .top{text-align:right;font-size:.92rem}.dech h2{margin:6px 0 10px;font-size:1.05rem;text-align:center}.dech .sig{display:flex;justify-content:space-between;margin-top:30px}
 .cut{border-top:2px dashed #666;margin:4px 0 14px}
 .rap{color:#000;background:#fff;font:15px/1.6 Georgia,serif}.rap h2{text-align:center;margin:24px 0 4px}.rap table{min-width:0;width:100%;border-collapse:collapse;margin-top:18px}.rap th,.rap td{border:1px solid #000;padding:10px;text-align:center;color:#000;background:#fff;position:static}
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px}
+.don{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;position:relative;flex:none}
+.don::after{content:"";position:absolute;inset:18px;border-radius:50%;background:var(--card)}
+.don span{position:relative;z-index:1;font-size:1.5rem;font-weight:800}
+.lg div{margin:4px 0}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.sb{display:flex;height:12px;border-radius:9px;overflow:hidden;background:var(--line);margin-bottom:3px}.sb i{display:block;height:100%}
+.mr{display:flex;align-items:center;gap:10px;margin:7px 0}.mr span{width:70px;color:var(--mute);font-size:.85rem}.mr .mb{flex:1;height:14px;background:var(--line);border-radius:9px;overflow:hidden}.mr .mb i{display:block;height:100%;background:var(--acc)}.mr b{width:44px;text-align:right}
+.ct{margin:0 0 12px;font-size:1.05rem}
 </style>
 </head>
 <body>
@@ -81,16 +89,22 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <p class="err" id="err" role="alert"></p><button id="add">Enregistrer le diplômé</button></details>
 <section class="card"><div class="bar">
 <div><label for="ses">Session</label><select id="ses"></select></div>
-<div class="f"><label for="q">Rechercher</label><input id="q" type="search" placeholder="Nom, n° de table, n° de pièce"></div>
+<div class="f"><label for="q">Rechercher par n° de table</label><input id="q" type="search" placeholder="N° de table" inputmode="numeric"></div>
 <div><label for="flt">Statut</label><select id="flt"><option value="">Tous</option><option value="0">Disponibles</option><option value="1">Retirés</option><option value="2">Retour à la DECO</option></select></div>
 <button class="g" id="imp">Importer Excel</button><button class="g" id="exp">Exporter Excel</button>
 <input type="file" id="file" accept=".xlsx,.xls" hidden></div>
 <div class="tw"><table><thead><tr><th>Session</th><th>N° de table</th><th>Nom et prénoms</th><th>Date et lieu de naissance</th><th>Statut</th><th>Effectué par</th><th>N° de pièce</th><th>Contact</th><th>Agent</th><th></th></tr></thead><tbody id="body"></tbody></table></div>
 <p id="more" style="color:var(--mute);margin:10px 0 0"></p></section></div>
-<div id="v-b" hidden><section class="card"><div class="bar"><div><label for="bf">Période : du</label><input id="bf" type="date"></div><div><label for="bt">au</label><input id="bt" type="date"></div>
-<button class="g" data-p="w">Cette semaine</button><button class="g" data-p="m">Ce mois</button><button class="g" data-p="pm">Mois dernier</button><button id="bp">Imprimer le bilan</button></div>
-<div class="bar" style="padding-top:10px;border-top:1px solid var(--line)"><div><label for="rw">Un jour de la semaine</label><input id="rw" type="date"></div><button class="g" id="bh">Rapport hebdomadaire</button><div><label for="rm">Mois</label><input id="rm" type="month"></div><button class="g" id="bm">Rapport mensuel</button></div>
-<div id="bil"></div></section></div>
+<div id="v-b" hidden>
+<div class="dash" id="k1"></div>
+<section class="card"><h3 class="ct">Par session</h3><div class="tw" id="k2"></div></section>
+<section class="card"><h3 class="ct">Retraits sur une période</h3>
+<div class="bar" id="perbar"><div><label for="bf">Du</label><input id="bf" type="date"></div><div><label for="bt">Au</label><input id="bt" type="date"></div><button class="g" data-p="w">Cette semaine</button><button class="g" data-p="m">Ce mois</button><button class="g" data-p="pm">Mois dernier</button></div>
+<div id="k3"></div></section>
+<section class="card"><h3 class="ct">Retraits par mois</h3><div id="k4"></div></section>
+<section class="card"><h3 class="ct">Rapports imprimables</h3>
+<div class="bar"><div><label for="rw">Un jour de la semaine</label><input id="rw" type="date"></div><button class="g" id="bh">Rapport hebdomadaire</button><div><label for="rm">Mois</label><input id="rm" type="month"></div><button class="g" id="bm">Rapport mensuel</button><button id="bp">Imprimer le bilan complet</button></div></section>
+</div>
 <div id="v-x" hidden><section class="card"><strong>Doublons possibles</strong><p style="color:var(--mute);margin:4px 0 12px">Mêmes nom et prénoms (dans n'importe quel ordre) et même date de naissance, toutes sessions confondues. Vérifiez puis corrigez ou supprimez.</p><div id="dup"></div></section></div>
 <div id="v-u" hidden><section class="card"><strong>Créer un compte</strong>
 <div class="grid"><div><label for="nn">Nom et prénoms</label><input id="nn"></div><div><label for="nu">Identifiant (lettres, chiffres, . - _)</label><input id="nu" autocapitalize="none"></div><div><label for="np">Mot de passe (6 caractères minimum)</label><input id="np"></div><div><label for="nr">Rôle</label><select id="nr"><option value="agent">Agent</option><option value="chef">Chef de service</option><option value="admin">Administrateur</option></select></div></div>
@@ -128,6 +142,7 @@ function norm(s){return String(s==null?"":s).replace(/\s+/g," ").trim()}
 function nul(s){s=norm(s);return s?s:null}
 function fd(s){return /^\d{4}-\d\d-\d\d$/.test(s||"")?s.split("-").reverse().join("/"):(s||"")}
 function pct(a,b){return b?Math.round(a*100/b):0}
+function T(v){return String(v==null?"":v).replace(/\s+/g,"")}
 function nl(s){return String(s||"").toLowerCase().replace(/\s+/g,"")}
 function mail(l){return l+"@grdbepc.app"}
 function lday(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
@@ -159,33 +174,38 @@ function key(p){var m=String(p.nai||"").match(/\d{1,2}\D+\d{1,2}\D+\d{4}/);if(!m
 function dups(){var m={};D.forEach(function(p){var k=key(p);if(k)(m[k]=m[k]||[]).push(p)});return Object.keys(m).filter(function(k){return m[k].length>1}).map(function(k){return m[k]})}
 function find(id){return D.filter(function(p){return String(p.id)===id})[0]}
 function rowHtml(p,full){var r=isR(p),adm=ADM(),can=CAN();
- return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(p.tab)+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+stTag(p)+"</td>"+
+ return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(T(p.tab))+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+stTag(p)+"</td>"+
  (full?"<td>"+esc(p.r_par)+"</td><td>"+esc(p.r_pc)+"</td><td>"+esc(p.r_c1)+(p.r_c2?"<small>"+esc(p.r_c2)+"</small>":"")+"</td><td>"+esc(p.r_agent)+"</td>":"")+
  "<td style='white-space:nowrap'>"+(full&&can?(r?'<button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":'<button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+(adm?" <button class='g sm' data-a='m' data-i='"+p.id+"'>Modifier</button>"+(full&&!r?" <button class='g sm' data-a='c' data-i='"+p.id+"'>"+(p.deco_date?"Annuler retour DECO":"Retour DECO")+"</button>":"")+(full&&r?" <button class='g sm' data-a='u' data-i='"+p.id+"'>Annuler</button>":"")+" <button class='g sm' data-a='d' data-i='"+p.id+"' aria-label='Supprimer'>×</button>":"")+"</td></tr>"}
 function rD(){
  fillSes();
- var q=norm($("q").value).toLowerCase(),f=$("flt").value,s=$("ses").value;
+ var q=T($("q").value).toLowerCase(),f=$("flt").value,s=$("ses").value;
  var base=D.filter(function(p){return !s||p.ses===s});
  var n=base.filter(isR).length;
  $("s0").textContent=base.length;$("s2").textContent=n;$("s1").textContent=base.length-n-base.filter(isD).length;$("s4").textContent=base.filter(isD).length;$("s3").textContent=pct(n,base.length)+" %";$("sp").style.width=pct(n,base.length)+"%";
- var r=base.filter(function(p){return (!f||stc(p)===f)&&(p.nom+" "+p.tab+" "+(p.r_pc||"")+" "+(p.r_par||"")).toLowerCase().indexOf(q)>-1});
+ var r=base.filter(function(p){return (!f||stc(p)===f)&&T(p.tab).toLowerCase().indexOf(q)>-1});
  $("body").innerHTML=r.length?r.slice(0,200).map(function(p){return rowHtml(p,true)}).join(""):'<tr><td colspan="10" style="color:var(--mute)">'+(D.length?"Aucun diplôme enregistré pour cette recherche":"Aucun diplôme enregistré. L'administrateur peut importer le fichier Excel.")+"</td></tr>";
  $("more").textContent=r.length>200?"200 premiers résultats sur "+r.length+". Affinez la recherche ou choisissez une session.":"";
 }
-function bilanHtml(){
- var t=D.length,n=D.filter(isR).length,dn=D.filter(isD).length,h="";
- h+='<div class="stats"><div class="stat"><b>'+t+'</b><span>Diplômes enregistrés</span></div><div class="stat"><b>'+n+'</b><span>Diplômes retirés</span></div><div class="stat y"><b>'+dn+'</b><span>Retours à la DECO</span></div><div class="stat w"><b>'+(t-n-dn)+'</b><span>Disponibles</span></div><div class="stat"><b>'+pct(n,t)+' %</b><span>Taux de retrait</span></div></div>';
- h+='<h3>Par session</h3><div class="tw"><table><thead><tr><th>Session</th><th>Diplômes</th><th>Retirés</th><th>Retour DECO</th><th>Disponibles</th><th>Taux</th></tr></thead><tbody>'+sessions().map(function(y){var b=D.filter(function(p){return p.ses===y}),r=b.filter(isR).length,d=b.filter(isD).length;return"<tr><td>"+y+"</td><td>"+b.length+"</td><td>"+r+"</td><td>"+d+"</td><td>"+(b.length-r-d)+'</td><td><div class="pg"><i style="width:'+pct(r,b.length)+'%"></i></div>'+pct(r,b.length)+" %</td></tr>"}).join("")+"</tbody></table></div>";
- var f=$("bf").value,e=$("bt").value;
+function kpiHtml(){var t=D.length,n=D.filter(isR).length,dn=D.filter(isD).length,dv=t-n-dn,a=pct(n,t),b=Math.min(100,a+pct(dn,t));
+ return '<div class="card" style="margin:0;display:flex;gap:18px;align-items:center;flex-wrap:wrap"><div class="don" style="background:conic-gradient(var(--ok) 0 '+a+'%,#ffe14d '+a+'% '+b+'%,var(--line) '+b+'% 100%)"><span>'+a+' %</span></div><div class="lg"><div style="font-weight:700">Taux de retrait</div><div><i style="background:var(--ok)"></i>Retirés : '+n+'</div><div><i style="background:#ffe14d"></i>Retour à la DECO : '+dn+'</div><div><i style="background:var(--line)"></i>Disponibles : '+dv+'</div></div></div>'+
+ '<div class="stats" style="margin:0;grid-template-columns:repeat(2,1fr)"><div class="stat"><b>'+t+'</b><span>Diplômes enregistrés</span></div><div class="stat"><b>'+n+'</b><span>Diplômes retirés</span></div><div class="stat y"><b>'+dn+'</b><span>Retours à la DECO</span></div><div class="stat w"><b>'+dv+'</b><span>Disponibles</span></div></div>'}
+function sesHtml(){var l=sessions();if(!l.length)return'<p style="color:var(--mute)">Aucune donnée.</p>';
+ return'<table style="min-width:660px"><thead><tr><th>Session</th><th>Diplômes</th><th>Retirés</th><th>Retour DECO</th><th>Disponibles</th><th>Répartition</th></tr></thead><tbody>'+l.map(function(y){var b=D.filter(function(p){return p.ses===y}),r=b.filter(isR).length,d=b.filter(isD).length;
+  return"<tr><td><b>"+y+"</b></td><td>"+b.length+"</td><td>"+r+"</td><td>"+d+"</td><td>"+(b.length-r-d)+'</td><td style="min-width:190px"><div class="sb"><i style="width:'+pct(r,b.length)+'%;background:var(--ok)"></i><i style="width:'+pct(d,b.length)+'%;background:#ffe14d"></i></div>'+pct(r,b.length)+" % retirés</td></tr>"}).join("")+"</tbody></table>"}
+function perHtml(){var f=$("bf").value,e=$("bt").value;
  var R=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&(!f||p.r_date>=f)&&(!e||p.r_date<=e)}).sort(function(a,b){return a.r_date<b.r_date?1:-1});
  var ag={};R.forEach(function(p){var k=p.r_agent||"Non renseigné (import)";ag[k]=(ag[k]||0)+1});
- h+="<h3>Retraits du "+fd(f)+" au "+fd(e)+" : "+R.length+"</h3>";
- if(R.length){h+='<div class="tw"><table style="min-width:0"><thead><tr><th>Agent</th><th>Retraits</th></tr></thead><tbody>'+Object.keys(ag).map(function(k){return"<tr><td>"+esc(k)+"</td><td>"+ag[k]+"</td></tr>"}).join("")+'</tbody></table></div><div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Session</th><th>Nom et prénoms</th><th>Effectué par</th></tr></thead><tbody>'+R.slice(0,150).map(function(p){return"<tr><td>"+fd(p.r_date)+"</td><td>"+esc(p.ses)+"</td><td>"+esc(p.nom)+"</td><td>"+esc(p.r_par)+"</td></tr>"}).join("")+"</tbody></table></div>"+(R.length>150?"<p>150 premiers sur "+R.length+".</p>":"")}
- var mo={};D.forEach(function(p){if(/^\d{4}-\d\d/.test(p.r_date||"")){var k=p.r_date.slice(0,7);mo[k]=(mo[k]||0)+1}});
- var ks=Object.keys(mo).sort().reverse().slice(0,12);
- if(ks.length)h+='<h3>Retraits par mois</h3><div class="tw"><table style="min-width:0"><thead><tr><th>Mois</th><th>Retraits</th></tr></thead><tbody>'+ks.map(function(k){return"<tr><td>"+k.slice(5)+"/"+k.slice(0,4)+"</td><td>"+mo[k]+"</td></tr>"}).join("")+"</tbody></table></div>";
+ var h='<p style="margin:0 0 12px"><b style="font-size:1.6rem">'+R.length+"</b> retrait(s) du "+fd(f)+" au "+fd(e)+"</p>";
+ if(R.length){h+='<div class="tw" style="max-height:none"><table style="min-width:0"><thead><tr><th>Agent</th><th>Retraits</th></tr></thead><tbody>'+Object.keys(ag).map(function(k){return"<tr><td>"+esc(k)+"</td><td>"+ag[k]+"</td></tr>"}).join("")+'</tbody></table></div><div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Session</th><th>Nom et prénoms</th><th>Effectué par</th></tr></thead><tbody>'+R.slice(0,150).map(function(p){return"<tr><td>"+fd(p.r_date)+"</td><td>"+esc(p.ses)+"</td><td>"+esc(p.nom)+"</td><td>"+esc(p.r_par)+"</td></tr>"}).join("")+"</tbody></table></div>"+(R.length>150?"<p>150 premiers sur "+R.length+".</p>":"")}
  return h}
-function rB(){if(!$("rw").value){$("rw").value=lday(new Date());$("rm").value=lday(new Date()).slice(0,7)}if(!$("bf").value){var n=new Date();$("bf").value=lday(new Date(n.getFullYear(),n.getMonth(),1));$("bt").value=lday(n)}$("bil").innerHTML=bilanHtml()}
+function moHtml(){var mo={};D.forEach(function(p){if(/^\d{4}-\d\d/.test(p.r_date||"")){var k=p.r_date.slice(0,7);mo[k]=(mo[k]||0)+1}});
+ var ks=Object.keys(mo).sort().reverse().slice(0,12),mx=0;ks.forEach(function(k){if(mo[k]>mx)mx=mo[k]});
+ return ks.length?ks.map(function(k){return'<div class="mr"><span>'+k.slice(5)+"/"+k.slice(0,4)+'</span><div class="mb"><i style="width:'+pct(mo[k],mx)+'%"></i></div><b>'+mo[k]+"</b></div>"}).join(""):'<p style="color:var(--mute)">Aucun retrait enregistré avec une date.</p>'}
+function bilanHtml(){return kpiHtml()+"<h3>Par session</h3>"+sesHtml()+"<h3>Retraits sur la période</h3>"+perHtml()+"<h3>Retraits par mois</h3>"+moHtml()}
+function rB(){if(!$("rw").value){$("rw").value=lday(new Date());$("rm").value=lday(new Date()).slice(0,7)}
+ if(!$("bf").value){var n=new Date();$("bf").value=lday(new Date(n.getFullYear(),n.getMonth(),1));$("bt").value=lday(n)}
+ $("k1").innerHTML=kpiHtml();$("k2").innerHTML=sesHtml();$("k3").innerHTML=perHtml();$("k4").innerHTML=moHtml()}
 function rX(){var g=dups();$("dup").innerHTML=g.length?g.map(function(a){return'<div class="tw" style="margin-bottom:14px;max-height:none"><table style="min-width:700px"><tbody>'+a.map(function(p){return rowHtml(p,false)}).join("")+"</tbody></table></div>"}).join(""):'<p style="color:var(--mute)">Aucun doublon détecté.</p>'}
 function rU(){$("ulist").innerHTML=P.map(function(x){var me=ME&&x.id===ME.id;
  return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+esc(x.full_name)+"</td><td>"+(x.role==="admin"?"Administrateur":x.role==="chef"?"Chef de service":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.role==="agent"&&x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+"<button class='g sm' data-u='n' data-i='"+x.id+"'>Nom</button> "+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='p' data-i='"+x.id+"'>Nouveau mot de passe</button> <button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button> <button class='g sm' data-u='s' data-i='"+x.id+"'>Supprimer</button>")+"</td></tr>"}).join("")}
@@ -196,8 +216,8 @@ function rS(){var q=$("sq").value.replace(/\s+/g,"").toLowerCase(),o=$("sr");
  if(q.length<3){o.innerHTML='<p style="color:var(--mute)">Saisissez le n° de table (au moins 3 caractères).</p>';return}
  var r=D.filter(function(p){return String(p.tab).replace(/\s+/g,"").toLowerCase().indexOf(q)>-1});
  o.innerHTML=r.length?r.slice(0,10).map(function(p){var x=isR(p);
-  return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(p.tab)+"</span>"+stTag(p)+(CAN()?(x?' <button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":' <button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+"</div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez le n° de table.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
-$("sq").oninput=rS;
+  return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(T(p.tab))+"</span>"+stTag(p)+(CAN()?(x?' <button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":' <button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+"</div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez le n° de table.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
+$("sq").oninput=function(){this.value=T(this.value);rS()};
 function render(){
  if(SIMPLE()){$("tabs").hidden=true;["d","b","x","u","j"].forEach(function(v){$("v-"+v).hidden=true});$("v-s").hidden=false;rS();return}
  $("tabs").hidden=false;$("v-s").hidden=true;
@@ -210,21 +230,22 @@ function render(){
 }
 $("tabs").onclick=function(e){var v=e.target.getAttribute("data-v");if(v){TAB=v;render()}};
 $("ses").onchange=function(){SEL=this.value;render()};
-$("q").oninput=render;$("flt").onchange=render;$("bf").onchange=render;$("bt").onchange=render;$("jq").oninput=render;
-document.querySelector("#v-b .bar").onclick=function(e){var k=e.target.getAttribute("data-p");if(!k)return;
+$("q").oninput=function(){this.value=T(this.value);render()};$("flt").onchange=render;$("bf").onchange=render;$("bt").onchange=render;$("jq").oninput=render;
+$("perbar").onclick=function(e){var k=e.target.getAttribute("data-p");if(!k)return;
  var n=new Date(),a,b;
  if(k==="w"){var d=(n.getDay()+6)%7;a=new Date(n.getFullYear(),n.getMonth(),n.getDate()-d);b=new Date(a.getFullYear(),a.getMonth(),a.getDate()+6)}
  else if(k==="m"){a=new Date(n.getFullYear(),n.getMonth(),1);b=new Date(n.getFullYear(),n.getMonth()+1,0)}
  else{a=new Date(n.getFullYear(),n.getMonth()-1,1);b=new Date(n.getFullYear(),n.getMonth(),0)}
  $("bf").value=lday(a);$("bt").value=lday(b);render()};
 $("add").onclick=async function(){
- var y=norm($("ys").value),t=norm($("tab").value),nm=norm($("nom").value),E=$("err");
+ var y=norm($("ys").value),t=T($("tab").value),nm=norm($("nom").value),E=$("err");
  if(!/^\d{4}$/.test(y)||!t||!nm){E.textContent="Renseignez la session (4 chiffres), le n° de table (obligatoire) et le nom.";return}
+ if(D.some(function(x){return x.ses===y&&T(x.tab)===t})){E.textContent="Ce n° de table existe déjà dans cette session.";return}
  var r=await sb.from("diplomes").insert({ses:y,tab:t,nom:nm,nai:norm($("nai").value)});
  if(r.error){E.textContent=r.error.code==="23505"?"Ce n° de table existe déjà dans cette session.":r.error.message;return}
  E.textContent="";LOG("Ajout",nm+" (session "+y+", table "+t+")");
  ["tab","nom","nai"].forEach(function(i){$(i).value=""});SEL=y;await refresh();$("tab").focus()};
-function openEdit(p){cur=p;$("et").textContent="Modifier : "+p.nom+" ("+p.ses+")";$("e_tab").value=p.tab;$("e_k").value=p.reste||"";$("e_nom").value=p.nom;$("e_nai").value=p.nai||"";
+function openEdit(p){cur=p;$("et").textContent="Modifier : "+p.nom+" ("+p.ses+")";$("e_tab").value=T(p.tab);$("e_k").value=p.reste||"";$("e_nom").value=p.nom;$("e_nai").value=p.nai||"";
  var r=isR(p);$("e_r").hidden=!r;$("e_deco").value=/^\d{4}-\d\d-\d\d$/.test(p.deco_date||"")?p.deco_date:"";if(r){$("e_dat").value=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?p.r_date:"";$("e_par").value=p.r_par||"";$("e_pc").value=p.r_pc||"";$("e_c1").value=p.r_c1||"";$("e_c2").value=p.r_c2||""}
  $("err3").textContent="";$("ed").showModal()}
 async function act(e){
@@ -240,7 +261,7 @@ async function act(e){
  else{cur=p;$("dt").textContent="Remise du diplôme : "+p.nom;$("dat").value=lday(new Date());$("par").value=p.nom;$("cni").value="";$("c1").value="";$("c2").value="";$("err2").textContent="";$("dlg").showModal()}
  }catch(x){ERR(x)}
 }
-$("body").onclick=act;$("dup").onclick=act;$("sr").onclick=act;
+$("body").onclick=act;$("dup").onclick=act;$("sr").onclick=act;$("tab").oninput=function(){this.value=T(this.value)};$("e_tab").oninput=function(){this.value=T(this.value)};
 $("no").onclick=function(){$("dlg").close()};
 $("ok").onclick=async function(){var E=$("err2"),id=cur.id;
  if(!$("dat").value||!norm($("par").value)||!norm($("cni").value)){E.textContent="Indiquez la date, la personne qui retire et le n° de pièce.";return}
@@ -250,7 +271,7 @@ $("ok").onclick=async function(){var E=$("err2"),id=cur.id;
   $("dlg").close();await refresh();var p=find(String(id));if(p)print(p)
  }catch(x){E.textContent=x.message||"Erreur"}finally{this.disabled=false}};
 $("no3").onclick=function(){$("ed").close()};
-$("ok3").onclick=async function(){var p=cur,E=$("err3"),t=norm($("e_tab").value),nm=norm($("e_nom").value),r=isR(p);
+$("ok3").onclick=async function(){var p=cur,E=$("err3"),t=T($("e_tab").value),nm=norm($("e_nom").value),r=isR(p);
  if(!t||!nm){E.textContent="Le n° de table et le nom sont obligatoires.";return}
  if(r&&(!$("e_dat").value||!norm($("e_par").value)||!norm($("e_pc").value))){E.textContent="Indiquez la date, la personne qui retire et le n° de pièce.";return}
  if(r&&$("e_deco").value){E.textContent="Un diplôme retiré ne peut pas être marqué « Retour à la DECO ».";return}
@@ -264,7 +285,7 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=norm($("e_tab").value)
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
 function print(p){
  var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
- var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(p.tab)+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br>(signature et cachet)<br><br><b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div></div></div>';
+ var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(T(p.tab))+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br>(signature et cachet)<br><br><b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div></div></div>';
  $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
 function rap(T,f,e){
  var n=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&p.r_date>=f&&p.r_date<=e}).length,d=new Date();
@@ -285,7 +306,7 @@ $("file").onchange=async function(){var inp=this,f=inp.files[0];if(!f)return;
    if(hi<0)return;sh++;
    var ix={c:[]};rows[hi].forEach(function(c,j){var h=norm(c).toUpperCase();
     if(/NOM ET PRENOM/.test(h))ix.n=j;else if(/TABLE/.test(h))ix.t=j;else if(/NAISSANCE/.test(h))ix.b=j;else if(/DATE DE RETRAIT/.test(h))ix.d=j;else if(/EFFECTU/.test(h))ix.e=j;else if(/PIECE|IDENTIT/.test(h))ix.p=j;else if(/RESTE/.test(h))ix.k=j;else if(/CONTACT/.test(h))ix.c.push(j)});
-   rows.slice(hi+1).forEach(function(r){var nm=norm(r[ix.n]);if(!nm)return;var t=norm(r[ix.t]);if(!t){noTab++;return}
+   rows.slice(hi+1).forEach(function(r){var nm=norm(r[ix.n]);if(!nm)return;var t=T(r[ix.t]);if(!t){noTab++;return}
     R.push({ses:y,tab:t,nom:nm,nai:norm(r[ix.b]),reste:ix.k==null?"":norm(r[ix.k]),r_date:nul(iso(r[ix.d])),r_par:nul(r[ix.e]),r_pc:nul(r[ix.p]),r_c1:nul(ph(r[ix.c[0]])),r_c2:nul(ph(r[ix.c[1]]))})})});
   if(!R.length){toast("Aucune ligne à importer (feuilles « SESSION 20XX » avec N° de table).",true);inp.value="";return}
   toast("Import en cours, patientez...");var add=0;
@@ -296,7 +317,7 @@ $("file").onchange=async function(){var inp=this,f=inp.files[0];if(!f)return;
 $("exp").onclick=function(){if(!window.XLSX){toast("Export Excel indisponible (connexion internet).",true);return}
  var wb=XLSX.utils.book_new();
  sessions().reverse().forEach(function(y){var rows=[["N° DE TABLE","NOM ET PRENOMS","DATE ET LIEU DE NAISSANCE","RESTE","DATE DE RETRAIT","EFFECTUE PAR","N° DE PIECE","CONTACT 1","CONTACT 2","ENREGISTRE PAR","RETOUR DECO"]];
-  D.filter(function(p){return p.ses===y}).forEach(function(p){rows.push([p.tab,p.nom,p.nai||"",p.reste||"",fd(p.r_date),p.r_par||"",p.r_pc||"",p.r_c1||"",p.r_c2||"",p.r_agent||"",p.deco_date?fd(p.deco_date):""])});
+  D.filter(function(p){return p.ses===y}).forEach(function(p){rows.push([T(p.tab),p.nom,p.nai||"",p.reste||"",fd(p.r_date),p.r_par||"",p.r_pc||"",p.r_c1||"",p.r_c2||"",p.r_agent||"",p.deco_date?fd(p.deco_date):""])});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"SESSION "+y)});
  if(!wb.SheetNames.length){toast("Rien à exporter.",true);return}
  XLSX.writeFile(wb,"RETRAITS_BEPC.xlsx");LOG("Export Excel","")};
