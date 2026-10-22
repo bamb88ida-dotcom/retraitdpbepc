@@ -55,6 +55,10 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 @media print{.tn{color:#000}}
 .ln{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--line);font-size:1.05rem}
 .tag.av{color:var(--ok)}.tag.rt{color:var(--bad)}
+.tag.deco{background:#ffe14d;color:#3a2f00}.stat.y{border-color:#e0b400}
+.dech{border:2px solid #000;padding:14px 22px;margin:0 0 14px;page-break-inside:avoid;font:14px/1.6 Georgia,serif;color:#000;background:#fff}
+.dech .top{text-align:right;font-size:.92rem}.dech h2{margin:6px 0 10px;font-size:1.05rem;text-align:center}.dech .sig{display:flex;justify-content:space-between;margin-top:30px}
+.cut{border-top:2px dashed #666;margin:4px 0 14px}
 </style>
 </head>
 <body>
@@ -66,26 +70,26 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <div id="lc" style="margin-top:10px" hidden><label for="lc2">Confirmer le mot de passe</label><input id="lc2" type="password"></div></div>
 <p class="err" id="lerr" role="alert"></p><button id="lb" style="width:100%" hidden></button></section></main>
 <main id="app" hidden>
-<nav id="tabs"><button data-v="d">Diplômes</button><button data-v="b">Bilans</button><button data-v="x" id="tx" data-adm>Doublons</button><button data-v="u" data-adm>Comptes</button><button data-v="j" data-adm>Journal</button></nav>
-<div id="v-s" hidden><section class="card"><strong style="font-size:1.15rem">Consultation d'un diplôme</strong><div style="margin-top:12px"><label for="sq">Nom ou n° de table</label><input id="sq" style="font-size:1.1rem" placeholder="Ex. KONE ou 23 43 02 285" autocomplete="off"></div><div id="sr" style="margin-top:14px"></div></section></div>
+<nav id="tabs"><button data-v="d">Diplômes</button><button data-v="b">Bilans</button><button data-v="x" id="tx" data-chef>Doublons</button><button data-v="u" data-adm>Comptes</button><button data-v="j" data-adm>Journal</button></nav>
+<div id="v-s" hidden><section class="card"><strong style="font-size:1.15rem">Consultation d'un diplôme</strong><div style="margin-top:12px"><label for="sq">N° de table</label><input id="sq" style="font-size:1.1rem" placeholder="Ex. 23 43 02 285" autocomplete="off" inputmode="numeric"></div><div id="sr" style="margin-top:14px"></div></section></div>
 <div id="v-d">
-<div class="stats"><div class="stat"><b id="s0">0</b><span>Diplômes (session choisie)</span></div><div class="stat w"><b id="s1">0</b><span>Disponibles</span></div><div class="stat"><b id="s2">0</b><span>Retirés</span></div><div class="stat"><b id="s3">0 %</b><span>Taux de retrait</span><div class="pg"><i id="sp"></i></div></div></div>
+<div class="stats"><div class="stat"><b id="s0">0</b><span>Diplômes (session choisie)</span></div><div class="stat w"><b id="s1">0</b><span>Disponibles</span></div><div class="stat"><b id="s2">0</b><span>Retirés</span></div><div class="stat y"><b id="s4">0</b><span>Retour à la DECO</span></div><div class="stat"><b id="s3">0 %</b><span>Taux de retrait</span><div class="pg"><i id="sp"></i></div></div></div>
 <details class="card" id="addc"><summary>+ Ajouter un diplômé</summary>
 <div class="grid"><div><label for="ys">Session (année)</label><input id="ys" inputmode="numeric" maxlength="4"></div><div><label for="tab">N° de table (obligatoire)</label><input id="tab"></div><div><label for="nom">Nom et prénoms</label><input id="nom"></div><div><label for="nai">Date et lieu de naissance</label><input id="nai" placeholder="30/12/1975 A SOUBRE"></div></div>
 <p class="err" id="err" role="alert"></p><button id="add">Enregistrer le diplômé</button></details>
 <section class="card"><div class="bar">
 <div><label for="ses">Session</label><select id="ses"></select></div>
 <div class="f"><label for="q">Rechercher</label><input id="q" type="search" placeholder="Nom, n° de table, n° de pièce"></div>
-<div><label for="flt">Statut</label><select id="flt"><option value="">Tous</option><option value="0">Disponibles</option><option value="1">Retirés</option></select></div>
+<div><label for="flt">Statut</label><select id="flt"><option value="">Tous</option><option value="0">Disponibles</option><option value="1">Retirés</option><option value="2">Retour à la DECO</option></select></div>
 <button class="g" id="imp">Importer Excel</button><button class="g" id="exp">Exporter Excel</button>
 <input type="file" id="file" accept=".xlsx,.xls" hidden></div>
-<div class="tw"><table><thead><tr><th>Session</th><th>N° de table</th><th>Nom et prénoms</th><th>Date et lieu de naissance</th><th>Date de retrait</th><th>Effectué par</th><th>N° de pièce</th><th>Contact</th><th>Agent</th><th></th></tr></thead><tbody id="body"></tbody></table></div>
+<div class="tw"><table><thead><tr><th>Session</th><th>N° de table</th><th>Nom et prénoms</th><th>Date et lieu de naissance</th><th>Statut</th><th>Effectué par</th><th>N° de pièce</th><th>Contact</th><th>Agent</th><th></th></tr></thead><tbody id="body"></tbody></table></div>
 <p id="more" style="color:var(--mute);margin:10px 0 0"></p></section></div>
 <div id="v-b" hidden><section class="card"><div class="bar"><div><label for="bf">Période : du</label><input id="bf" type="date"></div><div><label for="bt">au</label><input id="bt" type="date"></div>
 <button class="g" data-p="w">Cette semaine</button><button class="g" data-p="m">Ce mois</button><button class="g" data-p="pm">Mois dernier</button><button id="bp">Imprimer le bilan</button></div><div id="bil"></div></section></div>
 <div id="v-x" hidden><section class="card"><strong>Doublons possibles</strong><p style="color:var(--mute);margin:4px 0 12px">Mêmes nom et prénoms (dans n'importe quel ordre) et même date de naissance, toutes sessions confondues. Vérifiez puis corrigez ou supprimez.</p><div id="dup"></div></section></div>
 <div id="v-u" hidden><section class="card"><strong>Créer un compte</strong>
-<div class="grid"><div><label for="nu">Identifiant (lettres, chiffres, . - _)</label><input id="nu" autocapitalize="none"></div><div><label for="np">Mot de passe (6 caractères minimum)</label><input id="np"></div><div><label for="nr">Rôle</label><select id="nr"><option value="agent">Agent</option><option value="admin">Administrateur</option></select></div></div>
+<div class="grid"><div><label for="nu">Identifiant (lettres, chiffres, . - _)</label><input id="nu" autocapitalize="none"></div><div><label for="np">Mot de passe (6 caractères minimum)</label><input id="np"></div><div><label for="nr">Rôle</label><select id="nr"><option value="agent">Agent</option><option value="chef">Chef de service</option><option value="admin">Administrateur</option></select></div></div>
 <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="nrem" style="width:auto"> Agent autorisé à remettre les diplômes</label>
 <p class="err" id="ue" role="alert"></p><button id="ua">Créer le compte</button></section>
 <section class="card"><strong>Comptes existants</strong><div class="tw" style="margin-top:8px"><table style="min-width:600px"><thead><tr><th>Identifiant</th><th>Rôle</th><th>Remise</th><th>Accès</th><th></th></tr></thead><tbody id="ulist"></tbody></table></div></section></div>
@@ -104,6 +108,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <div style="margin-top:10px"><label for="e_nai">Date et lieu de naissance</label><input id="e_nai"></div>
 <div id="e_r"><h3 style="margin:14px 0 4px">Retrait</h3>
 <div class="g2"><div><label for="e_dat">Date de retrait</label><input id="e_dat" type="date"></div><div><label for="e_par">Effectué par</label><input id="e_par"></div><div><label for="e_pc">N° de pièce</label><input id="e_pc"></div><div><label for="e_c1">Contact 1</label><input id="e_c1" type="tel"></div><div><label for="e_c2">Contact 2</label><input id="e_c2" type="tel"></div></div></div>
+<div style="margin-top:10px"><label for="e_deco">Retour à la DECO (date ; laisser vide sinon)</label><input id="e_deco" type="date"></div>
 <p class="err" id="err3" role="alert"></p>
 <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="g" id="no3">Annuler</button><button type="button" id="ok3">Enregistrer</button></div></div></dialog>
 <div id="pr"></div><div id="toast" hidden></div>
@@ -125,9 +130,13 @@ function lday(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"
 function toast(m,bad){var t=$("toast");t.textContent=m;t.style.background=bad?"var(--bad)":"var(--ink)";t.hidden=false;clearTimeout(tm);tm=setTimeout(function(){t.hidden=true},5000)}
 function ERR(e){toast((e&&e.message)||"Erreur. Vérifiez la connexion internet.",true)}
 function ADM(){return !!ME&&ME.role==="admin"}
-function CAN(){return !!ME&&(ME.role==="admin"||!!ME.can_remit)}
-function SIMPLE(){return !!ME&&ME.role!=="admin"&&!ME.can_remit}
+function CAN(){return !!ME&&(ME.role==="admin"||(ME.role==="agent"&&!!ME.can_remit))}
+function CHEF(){return !!ME&&ME.role==="chef"}
+function SIMPLE(){return !!ME&&ME.role==="agent"}
 function isR(p){return !!(p.r_date||p.r_par||p.r_pc)}
+function isD(p){return !isR(p)&&!!p.deco_date}
+function stc(p){return isR(p)?"1":(p.deco_date?"2":"0")}
+function stTag(p){return isR(p)?'<span class="tag rt">Retiré'+(p.r_date?" le "+esc(fd(p.r_date)):"")+"</span>":(p.deco_date?'<span class="tag deco">Retour à la DECO'+(/^\d{4}-/.test(p.deco_date)?" · "+esc(fd(p.deco_date)):"")+"</span>":'<span class="tag av">Disponible</span>')}
 async function LOG(a,d){try{await sb.from("journal").insert({usr:ME.login,action:a,detail:d||""})}catch(e){}}
 async function loadAll(t){var a=[],f=0;for(;;){var r=await sb.from(t).select("*").order("id").range(f,f+999);if(r.error)throw r.error;a=a.concat(r.data);if(r.data.length<1000)break;f+=1000}return a}
 async function load(){
@@ -146,23 +155,23 @@ function key(p){var m=String(p.nai||"").match(/\d{1,2}\D+\d{1,2}\D+\d{4}/);if(!m
 function dups(){var m={};D.forEach(function(p){var k=key(p);if(k)(m[k]=m[k]||[]).push(p)});return Object.keys(m).filter(function(k){return m[k].length>1}).map(function(k){return m[k]})}
 function find(id){return D.filter(function(p){return String(p.id)===id})[0]}
 function rowHtml(p,full){var r=isR(p),adm=ADM(),can=CAN();
- return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(p.tab)+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+(r?'<span class="tag t1">'+esc(fd(p.r_date)||"Retiré")+"</span>":'<span class="tag t0">Disponible</span>')+"</td>"+
+ return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(p.tab)+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+stTag(p)+"</td>"+
  (full?"<td>"+esc(p.r_par)+"</td><td>"+esc(p.r_pc)+"</td><td>"+esc(p.r_c1)+(p.r_c2?"<small>"+esc(p.r_c2)+"</small>":"")+"</td><td>"+esc(p.r_agent)+"</td>":"")+
- "<td style='white-space:nowrap'>"+(full&&can?(r?'<button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':'<button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>'):"")+(adm?" <button class='g sm' data-a='m' data-i='"+p.id+"'>Modifier</button>"+(full&&r?" <button class='g sm' data-a='u' data-i='"+p.id+"'>Annuler</button>":"")+" <button class='g sm' data-a='d' data-i='"+p.id+"' aria-label='Supprimer'>×</button>":"")+"</td></tr>"}
+ "<td style='white-space:nowrap'>"+(full&&can?(r?'<button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":'<button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+(adm?" <button class='g sm' data-a='m' data-i='"+p.id+"'>Modifier</button>"+(full&&!r?" <button class='g sm' data-a='c' data-i='"+p.id+"'>"+(p.deco_date?"Annuler retour DECO":"Retour DECO")+"</button>":"")+(full&&r?" <button class='g sm' data-a='u' data-i='"+p.id+"'>Annuler</button>":"")+" <button class='g sm' data-a='d' data-i='"+p.id+"' aria-label='Supprimer'>×</button>":"")+"</td></tr>"}
 function rD(){
  fillSes();
  var q=norm($("q").value).toLowerCase(),f=$("flt").value,s=$("ses").value;
  var base=D.filter(function(p){return !s||p.ses===s});
  var n=base.filter(isR).length;
- $("s0").textContent=base.length;$("s2").textContent=n;$("s1").textContent=base.length-n;$("s3").textContent=pct(n,base.length)+" %";$("sp").style.width=pct(n,base.length)+"%";
- var r=base.filter(function(p){return (!f||String(isR(p)?1:0)===f)&&(p.nom+" "+p.tab+" "+(p.r_pc||"")+" "+(p.r_par||"")).toLowerCase().indexOf(q)>-1});
+ $("s0").textContent=base.length;$("s2").textContent=n;$("s1").textContent=base.length-n-base.filter(isD).length;$("s4").textContent=base.filter(isD).length;$("s3").textContent=pct(n,base.length)+" %";$("sp").style.width=pct(n,base.length)+"%";
+ var r=base.filter(function(p){return (!f||stc(p)===f)&&(p.nom+" "+p.tab+" "+(p.r_pc||"")+" "+(p.r_par||"")).toLowerCase().indexOf(q)>-1});
  $("body").innerHTML=r.length?r.slice(0,200).map(function(p){return rowHtml(p,true)}).join(""):'<tr><td colspan="10" style="color:var(--mute)">'+(D.length?"Aucun diplôme enregistré pour cette recherche":"Aucun diplôme enregistré. L'administrateur peut importer le fichier Excel.")+"</td></tr>";
  $("more").textContent=r.length>200?"200 premiers résultats sur "+r.length+". Affinez la recherche ou choisissez une session.":"";
 }
 function bilanHtml(){
- var t=D.length,n=D.filter(isR).length,h="";
- h+='<div class="stats"><div class="stat"><b>'+t+'</b><span>Diplômes enregistrés</span></div><div class="stat w"><b>'+(t-n)+'</b><span>Disponibles</span></div><div class="stat"><b>'+n+'</b><span>Retirés</span></div><div class="stat"><b>'+pct(n,t)+' %</b><span>Taux de retrait</span></div></div>';
- h+='<h3>Par session</h3><div class="tw"><table><thead><tr><th>Session</th><th>Diplômes</th><th>Retirés</th><th>Disponibles</th><th>Taux</th></tr></thead><tbody>'+sessions().map(function(y){var b=D.filter(function(p){return p.ses===y}),r=b.filter(isR).length;return"<tr><td>"+y+"</td><td>"+b.length+"</td><td>"+r+"</td><td>"+(b.length-r)+'</td><td><div class="pg"><i style="width:'+pct(r,b.length)+'%"></i></div>'+pct(r,b.length)+" %</td></tr>"}).join("")+"</tbody></table></div>";
+ var t=D.length,n=D.filter(isR).length,dn=D.filter(isD).length,h="";
+ h+='<div class="stats"><div class="stat"><b>'+t+'</b><span>Diplômes enregistrés</span></div><div class="stat"><b>'+n+'</b><span>Diplômes retirés</span></div><div class="stat y"><b>'+dn+'</b><span>Retours à la DECO</span></div><div class="stat w"><b>'+(t-n-dn)+'</b><span>Disponibles</span></div><div class="stat"><b>'+pct(n,t)+' %</b><span>Taux de retrait</span></div></div>';
+ h+='<h3>Par session</h3><div class="tw"><table><thead><tr><th>Session</th><th>Diplômes</th><th>Retirés</th><th>Retour DECO</th><th>Disponibles</th><th>Taux</th></tr></thead><tbody>'+sessions().map(function(y){var b=D.filter(function(p){return p.ses===y}),r=b.filter(isR).length,d=b.filter(isD).length;return"<tr><td>"+y+"</td><td>"+b.length+"</td><td>"+r+"</td><td>"+d+"</td><td>"+(b.length-r-d)+'</td><td><div class="pg"><i style="width:'+pct(r,b.length)+'%"></i></div>'+pct(r,b.length)+" %</td></tr>"}).join("")+"</tbody></table></div>";
  var f=$("bf").value,e=$("bt").value;
  var R=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&(!f||p.r_date>=f)&&(!e||p.r_date<=e)}).sort(function(a,b){return a.r_date<b.r_date?1:-1});
  var ag={};R.forEach(function(p){var k=p.r_agent||"Non renseigné (import)";ag[k]=(ag[k]||0)+1});
@@ -175,24 +184,24 @@ function bilanHtml(){
 function rB(){if(!$("bf").value){var n=new Date();$("bf").value=lday(new Date(n.getFullYear(),n.getMonth(),1));$("bt").value=lday(n)}$("bil").innerHTML=bilanHtml()}
 function rX(){var g=dups();$("dup").innerHTML=g.length?g.map(function(a){return'<div class="tw" style="margin-bottom:14px;max-height:none"><table style="min-width:700px"><tbody>'+a.map(function(p){return rowHtml(p,false)}).join("")+"</tbody></table></div>"}).join(""):'<p style="color:var(--mute)">Aucun doublon détecté.</p>'}
 function rU(){$("ulist").innerHTML=P.map(function(x){var me=ME&&x.id===ME.id;
- return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+(x.role==="admin"?"Administrateur":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button>")+"</td></tr>"}).join("")}
+ return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+(x.role==="admin"?"Administrateur":x.role==="chef"?"Chef de service":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.role==="agent"&&x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='p' data-i='"+x.id+"'>Nouveau mot de passe</button> <button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button>")+"</td></tr>"}).join("")}
 function rJ(){var q=norm($("jq").value).toLowerCase();var r=L.filter(function(l){return((l.usr||"")+" "+l.action+" "+(l.detail||"")).toLowerCase().indexOf(q)>-1});
  $("jb").innerHTML=r.length?r.slice(0,300).map(function(l){return"<tr><td style='white-space:nowrap'>"+esc(new Date(l.at).toLocaleString("fr-FR"))+"</td><td>"+esc(l.usr)+"</td><td>"+esc(l.action)+"</td><td>"+esc(l.detail)+"</td></tr>"}).join(""):'<tr><td colspan="4" style="color:var(--mute)">Journal vide.</td></tr>'}
 function sn(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
-function rS(){var q=sn($("sq").value).trim(),o=$("sr");
- if(q.length<2){o.innerHTML='<p style="color:var(--mute)">Saisissez au moins 2 lettres du nom ou le n° de table.</p>';return}
- var tq=q.replace(/\s+/g,""),w=q.split(/\s+/);
- var r=D.filter(function(p){var n=sn(p.nom),t=sn(p.tab).replace(/\s+/g,"");return t.indexOf(tq)>-1||w.every(function(x){return n.indexOf(x)>-1})});
- o.innerHTML=r.length?r.slice(0,10).map(function(p){var x=isR(p);return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(p.tab)+'</span><span class="tag '+(x?"rt":"av")+'">'+(x?"Déjà retiré":"Disponible")+"</span></div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez la recherche.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
+function rS(){var q=$("sq").value.replace(/\s+/g,"").toLowerCase(),o=$("sr");
+ if(q.length<3){o.innerHTML='<p style="color:var(--mute)">Saisissez le n° de table (au moins 3 caractères).</p>';return}
+ var r=D.filter(function(p){return String(p.tab).replace(/\s+/g,"").toLowerCase().indexOf(q)>-1});
+ o.innerHTML=r.length?r.slice(0,10).map(function(p){var x=isR(p);
+  return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(p.tab)+"</span>"+stTag(p)+(CAN()?(x?' <button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":' <button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+"</div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez le n° de table.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
 $("sq").oninput=rS;
 function render(){
  if(SIMPLE()){$("tabs").hidden=true;["d","b","x","u","j"].forEach(function(v){$("v-"+v).hidden=true});$("v-s").hidden=false;rS();return}
  $("tabs").hidden=false;$("v-s").hidden=true;
- if(!ADM()&&(TAB==="x"||TAB==="j"||TAB==="u"))TAB="d";
- var dn=ADM()?dups().length:0;$("tx").textContent="Doublons"+(dn?" ("+dn+")":"");
- Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){var v=b.getAttribute("data-v");b.className=v===TAB?"on":"";if(b.hasAttribute("data-adm"))b.hidden=!ADM()});
+ if(!ADM()&&(TAB==="j"||TAB==="u"||(TAB==="x"&&!CHEF())))TAB="d";
+ var dn=(ADM()||CHEF())?dups().length:0;$("tx").textContent="Doublons"+(dn?" ("+dn+")":"");
+ Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){var v=b.getAttribute("data-v");b.className=v===TAB?"on":"";if(b.hasAttribute("data-adm"))b.hidden=!ADM();if(b.hasAttribute("data-chef"))b.hidden=!(ADM()||CHEF())});
  ["d","b","x","u","j"].forEach(function(v){$("v-"+v).hidden=v!==TAB});
- $("addc").hidden=!ADM();$("imp").hidden=!ADM();
+ $("addc").hidden=!ADM();$("imp").hidden=!ADM();$("exp").hidden=!ADM();
  if(TAB==="d")rD();else if(TAB==="b")rB();else if(TAB==="x")rX();else if(TAB==="u")rU();else rJ();
 }
 $("tabs").onclick=function(e){var v=e.target.getAttribute("data-v");if(v){TAB=v;render()}};
@@ -212,7 +221,7 @@ $("add").onclick=async function(){
  E.textContent="";LOG("Ajout",nm+" (session "+y+", table "+t+")");
  ["tab","nom","nai"].forEach(function(i){$(i).value=""});SEL=y;await refresh();$("tab").focus()};
 function openEdit(p){cur=p;$("et").textContent="Modifier : "+p.nom+" ("+p.ses+")";$("e_tab").value=p.tab;$("e_k").value=p.reste||"";$("e_nom").value=p.nom;$("e_nai").value=p.nai||"";
- var r=isR(p);$("e_r").hidden=!r;if(r){$("e_dat").value=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?p.r_date:"";$("e_par").value=p.r_par||"";$("e_pc").value=p.r_pc||"";$("e_c1").value=p.r_c1||"";$("e_c2").value=p.r_c2||""}
+ var r=isR(p);$("e_r").hidden=!r;$("e_deco").value=/^\d{4}-\d\d-\d\d$/.test(p.deco_date||"")?p.deco_date:"";if(r){$("e_dat").value=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?p.r_date:"";$("e_par").value=p.r_par||"";$("e_pc").value=p.r_pc||"";$("e_c1").value=p.r_c1||"";$("e_c2").value=p.r_c2||""}
  $("err3").textContent="";$("ed").showModal()}
 async function act(e){
  if(!CAN())return;
@@ -221,12 +230,13 @@ async function act(e){
  try{
  if(a==="d"){if(ADM()&&confirm("Supprimer définitivement "+p.nom+" ("+p.ses+") ?")){var r=await sb.from("diplomes").delete().eq("id",p.id);if(r.error)throw r.error;LOG("Suppression",id);await refresh()}}
  else if(a==="u"){if(ADM()&&confirm("Annuler le retrait de "+p.nom+" ?")){var q=await sb.from("diplomes").update({r_date:null,r_par:null,r_pc:null,r_c1:null,r_c2:null,r_agent:null,r_at:null}).eq("id",p.id);if(q.error)throw q.error;LOG("Annulation du retrait",id+" — retrait du "+fd(p.r_date)+" par "+p.r_par);await refresh()}}
+ else if(a==="c"){if(ADM()){var rm=!p.deco_date;if(confirm((rm?"Marquer « Retour à la DECO » : ":"Annuler le retour à la DECO : ")+p.nom+" ?")){var q2=await sb.from("diplomes").update({deco_date:rm?lday(new Date()):null}).eq("id",p.id);if(q2.error)throw q2.error;LOG(rm?"Retour à la DECO":"Annulation du retour DECO",id);await refresh()}}}
  else if(a==="m"){if(ADM())openEdit(p)}
  else if(a==="p")print(p);
  else{cur=p;$("dt").textContent="Remise du diplôme : "+p.nom;$("dat").value=lday(new Date());$("par").value=p.nom;$("cni").value="";$("c1").value="";$("c2").value="";$("err2").textContent="";$("dlg").showModal()}
  }catch(x){ERR(x)}
 }
-$("body").onclick=act;$("dup").onclick=act;
+$("body").onclick=act;$("dup").onclick=act;$("sr").onclick=act;
 $("no").onclick=function(){$("dlg").close()};
 $("ok").onclick=async function(){var E=$("err2"),id=cur.id;
  if(!$("dat").value||!norm($("par").value)||!norm($("cni").value)){E.textContent="Indiquez la date, la personne qui retire et le n° de pièce.";return}
@@ -239,17 +249,19 @@ $("no3").onclick=function(){$("ed").close()};
 $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=norm($("e_tab").value),nm=norm($("e_nom").value),r=isR(p);
  if(!t||!nm){E.textContent="Le n° de table et le nom sont obligatoires.";return}
  if(r&&(!$("e_dat").value||!norm($("e_par").value)||!norm($("e_pc").value))){E.textContent="Indiquez la date, la personne qui retire et le n° de pièce.";return}
- var u={tab:t,nom:nm,nai:norm($("e_nai").value),reste:norm($("e_k").value)};
+ if(r&&$("e_deco").value){E.textContent="Un diplôme retiré ne peut pas être marqué « Retour à la DECO ».";return}
+ var u={tab:t,nom:nm,nai:norm($("e_nai").value),reste:norm($("e_k").value),deco_date:nul($("e_deco").value)};
  if(r){u.r_date=$("e_dat").value;u.r_par=norm($("e_par").value);u.r_pc=norm($("e_pc").value);u.r_c1=nul($("e_c1").value);u.r_c2=nul($("e_c2").value)}
- var ch=[],lab={tab:"N° de table",nom:"Nom",nai:"Naissance",reste:"Reste",r_date:"Date de retrait",r_par:"Effectué par",r_pc:"N° de pièce",r_c1:"Contact 1",r_c2:"Contact 2"};
+ var ch=[],lab={tab:"N° de table",nom:"Nom",nai:"Naissance",reste:"Reste",r_date:"Date de retrait",r_par:"Effectué par",r_pc:"N° de pièce",r_c1:"Contact 1",r_c2:"Contact 2",deco_date:"Retour DECO"};
  Object.keys(u).forEach(function(k){var o=norm(p[k]),n=norm(u[k]);if(o!==n)ch.push(lab[k]+" : "+(o||"vide")+" → "+(n||"vide"))});
  if(!ch.length){$("ed").close();return}
  var q=await sb.from("diplomes").update(u).eq("id",p.id);
  if(q.error){E.textContent=q.error.code==="23505"?"Ce n° de table existe déjà dans cette session.":q.error.message;return}
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
 function print(p){
- $("pr").innerHTML="<h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>"+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(p.tab)+"), le "+esc(fd(p.r_date))+".</p><div class='sig'><div>Le bénéficiaire<br><br>(signature)</div><div>L'agent de remise<br><br>(signature et cachet)</div></div>";
- window.print()}
+ var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
+ var h='<div class="dech"><div class="top">Soubré, le '+dt+'<br>Agent de remise : <b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(p.tab)+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'agent de remise<br><br>(signature et cachet)</div></div></div>';
+ $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
 $("bp").onclick=function(){$("pr").innerHTML="<h2>Bilan des retraits de diplômes BEPC</h2><p style='text-align:center'>Édité le "+new Date().toLocaleDateString("fr-FR")+" par "+esc(ME.login)+"</p>"+bilanHtml();window.print()};
 function iso(d){if(d instanceof Date&&!isNaN(d)){var x=new Date(d.getTime()+43200000);return lday(x)}
  var m=String(d||"").match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);return m?m[3]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2):norm(d)}
@@ -273,8 +285,8 @@ $("file").onchange=async function(){var inp=this,f=inp.files[0];if(!f)return;
  }catch(e){ERR(e)}inp.value=""};
 $("exp").onclick=function(){if(!window.XLSX){toast("Export Excel indisponible (connexion internet).",true);return}
  var wb=XLSX.utils.book_new();
- sessions().reverse().forEach(function(y){var rows=[["N° DE TABLE","NOM ET PRENOMS","DATE ET LIEU DE NAISSANCE","RESTE","DATE DE RETRAIT","EFFECTUE PAR","N° DE PIECE","CONTACT 1","CONTACT 2","ENREGISTRE PAR"]];
-  D.filter(function(p){return p.ses===y}).forEach(function(p){rows.push([p.tab,p.nom,p.nai||"",p.reste||"",fd(p.r_date),p.r_par||"",p.r_pc||"",p.r_c1||"",p.r_c2||"",p.r_agent||""])});
+ sessions().reverse().forEach(function(y){var rows=[["N° DE TABLE","NOM ET PRENOMS","DATE ET LIEU DE NAISSANCE","RESTE","DATE DE RETRAIT","EFFECTUE PAR","N° DE PIECE","CONTACT 1","CONTACT 2","ENREGISTRE PAR","RETOUR DECO"]];
+  D.filter(function(p){return p.ses===y}).forEach(function(p){rows.push([p.tab,p.nom,p.nai||"",p.reste||"",fd(p.r_date),p.r_par||"",p.r_pc||"",p.r_c1||"",p.r_c2||"",p.r_agent||"",p.deco_date?fd(p.deco_date):""])});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"SESSION "+y)});
  if(!wb.SheetNames.length){toast("Rien à exporter.",true);return}
  XLSX.writeFile(wb,"RETRAITS_BEPC.xlsx");LOG("Export Excel","")};
@@ -292,9 +304,15 @@ $("ua").onclick=async function(){var E=$("ue"),lg=nl($("nu").value),pw=$("np").v
  }catch(x){E.textContent=x.message||"Erreur"}finally{this.disabled=false}};
 $("ulist").onclick=async function(e){var k=e.target.getAttribute("data-u"),id=e.target.getAttribute("data-i");if(!k)return;
  var x=P.filter(function(u){return u.id===id})[0];if(!x)return;
+ if(k==="p"){await resetPw(x);return}
  var u=k==="r"?{can_remit:!x.can_remit}:{active:!x.active};
  var r=await sb.from("profiles").update(u).eq("id",id);if(r.error){ERR(r.error);return}
  LOG(k==="r"?"Droit de remise":"Accès du compte",x.login+" : "+(k==="r"?(u.can_remit?"autorisée":"retirée"):(u.active?"réactivé":"désactivé")));await refresh()};
+function gpw(){var a="abcdefghjkmnpqrstuvwxyz23456789",b=new Uint32Array(8),t="";crypto.getRandomValues(b);for(var i=0;i<8;i++)t+=a[b[i]%a.length];return t}
+async function resetPw(x){var p=prompt("Nouveau mot de passe pour « "+x.login+" » (6 caractères minimum) :",gpw());if(!p)return;
+ if(p.length<6){toast("Mot de passe trop court.",true);return}
+ var r=await sb.rpc("admin_set_password",{p_id:x.id,p_pw:p});if(r.error){ERR(r.error);return}
+ alert("Le mot de passe de « "+x.login+" » est maintenant :\n\n"+p+"\n\nNotez-le et remettez-le à la personne. Elle pourra le changer avec « Mon mot de passe ».")}
 $("rf").onclick=function(){refresh();toast("Données actualisées.")};
 $("pw").onclick=async function(){var p=prompt("Nouveau mot de passe (6 caractères minimum) :");if(!p)return;if(p.length<6){toast("Mot de passe trop court.",true);return}
  var r=await sb.auth.updateUser({password:p});if(r.error)ERR(r.error);else toast("Mot de passe modifié.")};
@@ -308,7 +326,7 @@ async function enter(){
  var r=await sb.from("profiles").select("*").eq("id",u.id).maybeSingle();
  if(r.error||!r.data||!r.data.active){await sb.auth.signOut();await toLogin("Ce compte n'est pas autorisé. Contactez l'administrateur.");return}
  ME=r.data;$("lg").hidden=true;$("app").hidden=false;$("ub").hidden=false;
- $("who").textContent=ME.login+" ("+(ADM()?"administrateur":ME.can_remit?"agent, remise autorisée":"agent")+")";
+ $("who").textContent=ME.login+" ("+(ADM()?"administrateur":CHEF()?"chef de service":ME.can_remit?"agent, remise autorisée":"agent")+")";
  SEL=null;TAB="d";await refresh();LOG("Connexion","");clearInterval(iv);iv=setInterval(function(){if(ME&&!document.querySelector("dialog[open]"))refresh()},60000)}
 $("lb").onclick=async function(){var btn=this,lg=nl($("lu").value),pw=$("lp").value,first=!!btn.getAttribute("data-first"),E=$("lerr");
  if(!lg||!pw){E.textContent="Entrez l'identifiant et le mot de passe.";return}
