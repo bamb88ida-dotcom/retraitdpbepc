@@ -111,7 +111,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="nrem" style="width:auto"> Agent autorisé à remettre les diplômes</label>
 <p class="err" id="ue" role="alert"></p><button id="ua">Créer le compte</button></section>
 <section class="card"><strong>Comptes existants</strong><div class="tw" style="margin-top:8px"><table style="min-width:600px"><thead><tr><th>Identifiant</th><th>Nom et prénoms</th><th>Rôle</th><th>Remise</th><th>Accès</th><th></th></tr></thead><tbody id="ulist"></tbody></table></div></section></div>
-<div id="v-j" hidden><section class="card"><div class="bar"><div class="f"><label for="jq">Rechercher dans le journal</label><input id="jq" type="search" placeholder="Nom, agent, action..."></div></div><div class="tw"><table><thead><tr><th>Date et heure</th><th>Utilisateur</th><th>Action</th><th>Détail</th></tr></thead><tbody id="jb"></tbody></table></div></section></div>
+<div id="v-j" hidden><section class="card"><div class="bar"><div class="f"><label for="jq">Rechercher dans le journal</label><input id="jq" type="search" placeholder="Nom, agent, action..."></div><button class="g" id="jx">Exporter tout le journal</button></div><div class="tw"><table><thead><tr><th>Date et heure</th><th>Utilisateur</th><th>Action</th><th>Détail</th></tr></thead><tbody id="jb"></tbody></table></div></section></div>
 </main>
 <dialog id="dlg"><div><strong id="dt">Remise du diplôme</strong>
 <div style="margin-top:10px"><label for="dat">Date de retrait</label><input id="dat" type="date"></div>
@@ -149,7 +149,8 @@ function lday(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"
 function toast(m,bad){var t=$("toast");t.textContent=m;t.style.background=bad?"var(--bad)":"var(--ink)";t.hidden=false;clearTimeout(tm);tm=setTimeout(function(){t.hidden=true},5000)}
 function ERR(e){toast((e&&e.message)||"Erreur. Vérifiez la connexion internet.",true)}
 function ADM(){return !!ME&&ME.role==="admin"}
-function CAN(){return !!ME&&(ME.role==="admin"||(ME.role==="agent"&&!!ME.can_remit))}
+function CAN(){return !!ME&&(ME.role==="admin"||ME.role==="chef"||(ME.role==="agent"&&!!ME.can_remit))}
+function MGR(){return ADM()||CHEF()}
 function CHEF(){return !!ME&&ME.role==="chef"}
 function SIMPLE(){return !!ME&&ME.role==="agent"}
 function isR(p){return !!(p.r_date||p.r_par||p.r_pc)}
@@ -161,7 +162,7 @@ async function loadAll(t){var a=[],f=0;for(;;){var r=await sb.from(t).select("*"
 async function load(){
  var d=await loadAll("diplomes");d.sort(function(a,b){return a.nom.localeCompare(b.nom,"fr")});D=d;
  if(ADM()){var p=await sb.from("profiles").select("*").order("login");if(!p.error)P=p.data;
-  var j=await sb.from("journal").select("*").order("at",{ascending:false}).limit(500);if(!j.error)L=j.data}
+  var j=await sb.from("journal").select("*").order("at",{ascending:false}).limit(3000);if(!j.error)L=j.data}
  render()}
 async function refresh(){try{await load()}catch(e){ERR(e)}}
 function sessions(){var m={};D.forEach(function(p){m[p.ses]=1});return Object.keys(m).sort().reverse()}
@@ -173,7 +174,7 @@ function key(p){var m=String(p.nai||"").match(/\d{1,2}\D+\d{1,2}\D+\d{4}/);if(!m
  var n=String(p.nom).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z ]/g," ").split(/\s+/).filter(Boolean).sort().join(" ");return n+"|"+d}
 function dups(){var m={};D.forEach(function(p){var k=key(p);if(k)(m[k]=m[k]||[]).push(p)});return Object.keys(m).filter(function(k){return m[k].length>1}).map(function(k){return m[k]})}
 function find(id){return D.filter(function(p){return String(p.id)===id})[0]}
-function rowHtml(p,full){var r=isR(p),adm=ADM(),can=CAN();
+function rowHtml(p,full){var r=isR(p),adm=MGR(),can=CAN();
  return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(T(p.tab))+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+stTag(p)+"</td>"+
  (full?"<td>"+esc(p.r_par)+"</td><td>"+esc(p.r_pc)+"</td><td>"+esc(p.r_c1)+(p.r_c2?"<small>"+esc(p.r_c2)+"</small>":"")+"</td><td>"+esc(p.r_agent)+"</td>":"")+
  "<td style='white-space:nowrap'>"+(full&&can?(r?'<button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":'<button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+(adm?" <button class='g sm' data-a='m' data-i='"+p.id+"'>Modifier</button>"+(full&&!r?" <button class='g sm' data-a='c' data-i='"+p.id+"'>"+(p.deco_date?"Annuler retour DECO":"Retour DECO")+"</button>":"")+(full&&r?" <button class='g sm' data-a='u' data-i='"+p.id+"'>Annuler</button>":"")+" <button class='g sm' data-a='d' data-i='"+p.id+"' aria-label='Supprimer'>×</button>":"")+"</td></tr>"}
@@ -184,6 +185,7 @@ function rD(){
  var n=base.filter(isR).length;
  $("s0").textContent=base.length;$("s2").textContent=n;$("s1").textContent=base.length-n-base.filter(isD).length;$("s4").textContent=base.filter(isD).length;$("s3").textContent=pct(n,base.length)+" %";$("sp").style.width=pct(n,base.length)+"%";
  var r=base.filter(function(p){return (!f||stc(p)===f)&&T(p.tab).toLowerCase().indexOf(q)>-1});
+ if(q.length<3)lastQ="";else logSearch(q,r.length);
  $("body").innerHTML=r.length?r.slice(0,200).map(function(p){return rowHtml(p,true)}).join(""):'<tr><td colspan="10" style="color:var(--mute)">'+(D.length?"Aucun diplôme enregistré pour cette recherche":"Aucun diplôme enregistré. L'administrateur peut importer le fichier Excel.")+"</td></tr>";
  $("more").textContent=r.length>200?"200 premiers résultats sur "+r.length+". Affinez la recherche ou choisissez une session.":"";
 }
@@ -209,12 +211,21 @@ function rB(){if(!$("rw").value){$("rw").value=lday(new Date());$("rm").value=ld
 function rX(){var g=dups();$("dup").innerHTML=g.length?g.map(function(a){return'<div class="tw" style="margin-bottom:14px;max-height:none"><table style="min-width:700px"><tbody>'+a.map(function(p){return rowHtml(p,false)}).join("")+"</tbody></table></div>"}).join(""):'<p style="color:var(--mute)">Aucun doublon détecté.</p>'}
 function rU(){$("ulist").innerHTML=P.map(function(x){var me=ME&&x.id===ME.id;
  return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+esc(x.full_name)+"</td><td>"+(x.role==="admin"?"Administrateur":x.role==="chef"?"Chef de service":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.role==="agent"&&x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+"<button class='g sm' data-u='n' data-i='"+x.id+"'>Nom</button> "+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='p' data-i='"+x.id+"'>Nouveau mot de passe</button> <button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button> <button class='g sm' data-u='s' data-i='"+x.id+"'>Supprimer</button>")+"</td></tr>"}).join("")}
+var JN=300,lastQ="",lt=null;
+function logSearch(q,n){if(q===lastQ)return;clearTimeout(lt);lt=setTimeout(function(){lastQ=q;LOG("Recherche","N° de table « "+q+" » : "+n+" résultat(s)")},1500)}
+$("jb").onclick=function(e){if(e.target.id==="jm"){JN+=300;rJ()}};
+$("jx").onclick=async function(){if(!window.XLSX){toast("Export Excel indisponible (connexion internet).",true);return}
+ try{var all=await loadAll("journal");all.reverse();
+  var rows=[["DATE ET HEURE","UTILISATEUR","ACTION","DETAIL"]].concat(all.map(function(l){return[new Date(l.at).toLocaleString("fr-FR"),l.usr||"",l.action||"",l.detail||""]}));
+  var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"JOURNAL");XLSX.writeFile(wb,"JOURNAL_RETRAIT.xlsx");LOG("Export du journal",all.length+" ligne(s)")
+ }catch(e){ERR(e)}};
 function rJ(){var q=norm($("jq").value).toLowerCase();var r=L.filter(function(l){return((l.usr||"")+" "+l.action+" "+(l.detail||"")).toLowerCase().indexOf(q)>-1});
- $("jb").innerHTML=r.length?r.slice(0,300).map(function(l){return"<tr><td style='white-space:nowrap'>"+esc(new Date(l.at).toLocaleString("fr-FR"))+"</td><td>"+esc(l.usr)+"</td><td>"+esc(l.action)+"</td><td>"+esc(l.detail)+"</td></tr>"}).join(""):'<tr><td colspan="4" style="color:var(--mute)">Journal vide.</td></tr>'}
+ $("jb").innerHTML=r.length?r.slice(0,JN).map(function(l){return"<tr><td style='white-space:nowrap'>"+esc(new Date(l.at).toLocaleString("fr-FR"))+"</td><td>"+esc(l.usr)+"</td><td>"+esc(l.action)+"</td><td>"+esc(l.detail)+"</td></tr>"}).join("")+(r.length>JN?'<tr><td colspan="4"><button class="g sm" id="jm">Afficher plus ('+(r.length-JN)+' restantes)</button></td></tr>':""):'<tr><td colspan="4" style="color:var(--mute)">Journal vide.</td></tr>'}
 function sn(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()}
 function rS(){var q=$("sq").value.replace(/\s+/g,"").toLowerCase(),o=$("sr");
- if(q.length<3){o.innerHTML='<p style="color:var(--mute)">Saisissez le n° de table (au moins 3 caractères).</p>';return}
+ if(q.length<3){o.innerHTML='<p style="color:var(--mute)">Saisissez le n° de table (au moins 3 caractères).</p>';lastQ="";return}
  var r=D.filter(function(p){return String(p.tab).replace(/\s+/g,"").toLowerCase().indexOf(q)>-1});
+ logSearch(q,r.length);
  o.innerHTML=r.length?r.slice(0,10).map(function(p){var x=isR(p);
   return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(T(p.tab))+"</span>"+stTag(p)+(CAN()?(x?' <button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":' <button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+"</div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez le n° de table.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
 $("sq").oninput=function(){this.value=T(this.value);rS()};
@@ -253,10 +264,10 @@ async function act(e){
  var a=e.target.getAttribute("data-a"),p=a&&find(e.target.getAttribute("data-i"));if(!p)return;
  var id=p.nom+" (session "+p.ses+", table "+p.tab+")";
  try{
- if(a==="d"){if(ADM()&&confirm("Supprimer définitivement "+p.nom+" ("+p.ses+") ?")){var r=await sb.from("diplomes").delete().eq("id",p.id);if(r.error)throw r.error;LOG("Suppression",id);await refresh()}}
- else if(a==="u"){if(ADM()&&confirm("Annuler le retrait de "+p.nom+" ?")){var q=await sb.from("diplomes").update({r_date:null,r_par:null,r_pc:null,r_c1:null,r_c2:null,r_agent:null,r_at:null}).eq("id",p.id);if(q.error)throw q.error;LOG("Annulation du retrait",id+" — retrait du "+fd(p.r_date)+" par "+p.r_par);await refresh()}}
- else if(a==="c"){if(ADM()){var rm=!p.deco_date;if(confirm((rm?"Marquer « Retour à la DECO » : ":"Annuler le retour à la DECO : ")+p.nom+" ?")){var q2=await sb.from("diplomes").update({deco_date:rm?lday(new Date()):null}).eq("id",p.id);if(q2.error)throw q2.error;LOG(rm?"Retour à la DECO":"Annulation du retour DECO",id);await refresh()}}}
- else if(a==="m"){if(ADM())openEdit(p)}
+ if(a==="d"){if(MGR()&&confirm("Supprimer définitivement "+p.nom+" ("+p.ses+") ?")){var r=await sb.from("diplomes").delete().eq("id",p.id);if(r.error)throw r.error;LOG("Suppression",id);await refresh()}}
+ else if(a==="u"){if(MGR()&&confirm("Annuler le retrait de "+p.nom+" ?")){var q=await sb.from("diplomes").update({r_date:null,r_par:null,r_pc:null,r_c1:null,r_c2:null,r_agent:null,r_at:null}).eq("id",p.id);if(q.error)throw q.error;LOG("Annulation du retrait",id+" — retrait du "+fd(p.r_date)+" par "+p.r_par);await refresh()}}
+ else if(a==="c"){if(MGR()){var rm=!p.deco_date;if(confirm((rm?"Marquer « Retour à la DECO » : ":"Annuler le retour à la DECO : ")+p.nom+" ?")){var q2=await sb.from("diplomes").update({deco_date:rm?lday(new Date()):null}).eq("id",p.id);if(q2.error)throw q2.error;LOG(rm?"Retour à la DECO":"Annulation du retour DECO",id);await refresh()}}}
+ else if(a==="m"){if(MGR())openEdit(p)}
  else if(a==="p")print(p);
  else{cur=p;$("dt").textContent="Remise du diplôme : "+p.nom;$("dat").value=lday(new Date());$("par").value=p.nom;$("cni").value="";$("c1").value="";$("c2").value="";$("err2").textContent="";$("dlg").showModal()}
  }catch(x){ERR(x)}
@@ -283,16 +294,16 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=T($("e_tab").value),nm
  var q=await sb.from("diplomes").update(u).eq("id",p.id);
  if(q.error){E.textContent=q.error.code==="23505"?"Ce n° de table existe déjà dans cette session.":q.error.message;return}
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
-function print(p){
+function print(p){LOG("Impression de la décharge",p.nom+" (session "+p.ses+", table "+T(p.tab)+")");
  var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
  var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(T(p.tab))+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br>(signature et cachet)<br><br><b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div></div></div>';
  $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
-function rap(T,f,e){
+function rap(T,f,e){LOG(T+" imprimé","du "+fd(f)+" au "+fd(e));
  var n=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&p.r_date>=f&&p.r_date<=e}).length,d=new Date();
  $("pr").innerHTML='<div class="rap"><div style="text-align:right">Le '+("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear()+'</div><h2>'+T+'</h2><p style="text-align:center">du '+fd(f)+" au "+fd(e)+'</p><table><thead><tr><th style="width:12%">N°</th><th>Libellé</th><th style="width:26%">Nbre de retrait</th></tr></thead><tbody><tr><td>01</td><td>Retrait de diplôme BEPC</td><td>'+n+"</td></tr></tbody></table></div>";window.print()}
 $("bh").onclick=function(){var d=$("rw").value?new Date($("rw").value+"T12:00:00"):new Date(),k=(d.getDay()+6)%7,a=new Date(d.getFullYear(),d.getMonth(),d.getDate()-k),b=new Date(a.getFullYear(),a.getMonth(),a.getDate()+6);rap("Rapport hebdomadaire",lday(a),lday(b))};
 $("bm").onclick=function(){var v=$("rm").value||lday(new Date()).slice(0,7),y=+v.slice(0,4),m=+v.slice(5,7);rap("Rapport mensuel",lday(new Date(y,m-1,1)),lday(new Date(y,m,0)))};
-$("bp").onclick=function(){$("pr").innerHTML="<h2>Bilan des retraits de diplômes BEPC</h2><p style='text-align:center'>Édité le "+new Date().toLocaleDateString("fr-FR")+" par "+esc(ME.login)+"</p>"+bilanHtml();window.print()};
+$("bp").onclick=function(){LOG("Bilan complet imprimé","");$("pr").innerHTML="<h2>Bilan des retraits de diplômes BEPC</h2><p style='text-align:center'>Édité le "+new Date().toLocaleDateString("fr-FR")+" par "+esc(ME.login)+"</p>"+bilanHtml();window.print()};
 function ph(v){var t=norm(v);return /^\d{9}$/.test(t)?"0"+t:t}
 function iso(d){if(d instanceof Date&&!isNaN(d)){var x=new Date(d.getTime()+43200000);return lday(x)}
  var m=String(d||"").match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);return m?m[3]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2):norm(d)}
@@ -349,8 +360,8 @@ async function resetPw(x){var p=prompt("Nouveau mot de passe pour « "+x.login+"
  alert("Le mot de passe de « "+x.login+" » est maintenant :\n\n"+p+"\n\nNotez-le et remettez-le à la personne. Elle pourra le changer avec « Mon mot de passe ».")}
 $("rf").onclick=function(){refresh();toast("Données actualisées.")};
 $("pw").onclick=async function(){var p=prompt("Nouveau mot de passe (6 caractères minimum) :");if(!p)return;if(p.length<6){toast("Mot de passe trop court.",true);return}
- var r=await sb.auth.updateUser({password:p});if(r.error)ERR(r.error);else toast("Mot de passe modifié.")};
-$("lo").onclick=async function(){clearInterval(iv);await sb.auth.signOut();D=[];P=[];L=[];ME=null;$("app").hidden=true;$("ub").hidden=true;await toLogin()};
+ var r=await sb.auth.updateUser({password:p});if(r.error)ERR(r.error);else{toast("Mot de passe modifié.");LOG("Changement de son mot de passe","")}};
+$("lo").onclick=async function(){clearInterval(iv);await LOG("Déconnexion","");await sb.auth.signOut();D=[];P=[];L=[];ME=null;$("app").hidden=true;$("ub").hidden=true;await toLogin()};
 function showLogin(m,first,hideForm){ME=null;$("lg").hidden=false;$("app").hidden=true;$("ub").hidden=true;
  $("lt").textContent=first?"Créer le compte administrateur":"Connexion";$("lc").hidden=!first;$("ln").hidden=!first;$("lf").hidden=!!hideForm;$("lb").hidden=!!hideForm;
  $("lb").textContent=first?"Créer le compte":"Se connecter";$("lb").setAttribute("data-first",first?"1":"");$("lp").value="";$("lc2").value="";$("lerr").textContent=m||""}
