@@ -47,7 +47,7 @@ h3{margin:18px 0 8px}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:480px;width:92%}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 #pr{display:none}
-@media print{:root{--bg:#fff;--card:#fff;--ink:#000;--mute:#444;--line:#999;--acc:#17806a;--sh:none}body>*:not(#pr){display:none!important}#pr{display:block;padding:24px;color:#000;background:#fff;font:14px/1.6 Georgia,serif}#pr h2{text-align:center}.sig{display:flex;justify-content:space-between;margin-top:60px}.tw{max-height:none;overflow:visible}table{min-width:0;font-size:12px}th{position:static}}
+@media print{:root{--bg:#fff;--card:#fff;--ink:#000;--mute:#444;--line:#999;--acc:#17806a;--sh:none}body>*:not(#pr){display:none!important}#pr{display:block;padding:24px;color:#000;background:#fff;font:14px/1.6 "Times New Roman",Times,serif;font-variant-numeric:lining-nums}#pr h2{text-align:center}.sig{display:flex;justify-content:space-between;margin-top:60px}.tw{max-height:none;overflow:visible}table{min-width:0;font-size:12px}th{position:static}}
 
 .tn{color:#1b5ed6;font-weight:700;white-space:nowrap}
 @media (prefers-color-scheme:dark){.tn{color:#7fb0ff}}
@@ -56,10 +56,10 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 .ln{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--line);font-size:1.05rem}
 .tag.av{color:var(--ok)}.tag.rt{color:var(--bad)}
 .tag.deco{background:#ffe14d;color:#3a2f00}.stat.y{border-color:#e0b400}
-.dech{border:2px solid #000;padding:14px 22px;margin:0 0 14px;page-break-inside:avoid;font:14px/1.6 Georgia,serif;color:#000;background:#fff}
+.dech{border:2px solid #000;padding:14px 22px;margin:0 0 14px;page-break-inside:avoid;font:14px/1.6 "Times New Roman",Times,serif;font-variant-numeric:lining-nums;color:#000;background:#fff}
 .dech .top{text-align:right;font-size:.92rem}.dech h2{margin:6px 0 10px;font-size:1.05rem;text-align:center}.dech .sig{display:flex;justify-content:space-between;margin-top:30px}
 .cut{border-top:2px dashed #666;margin:4px 0 14px}
-.rap{color:#000;background:#fff;font:15px/1.6 Georgia,serif}.rap h2{text-align:center;margin:24px 0 4px}.rap table{min-width:0;width:100%;border-collapse:collapse;margin-top:18px}.rap th,.rap td{border:1px solid #000;padding:10px;text-align:center;color:#000;background:#fff;position:static}
+.rap{color:#000;background:#fff;font:15px/1.6 "Times New Roman",Times,serif;font-variant-numeric:lining-nums}.rap h2{text-align:center;margin:24px 0 4px}.rap table{min-width:0;width:100%;border-collapse:collapse;margin-top:18px}.rap th,.rap td{border:1px solid #000;padding:10px;text-align:center;color:#000;background:#fff;position:static}
 .dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px}
 .don{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;position:relative;flex:none}
 .don::after{content:"";position:absolute;inset:18px;border-radius:50%;background:var(--card)}
@@ -305,7 +305,7 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=T($("e_tab").value),nm
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
 function print(p){LOG("Impression de la décharge",p.nom+" (session "+p.ses+", table "+T(p.tab)+")");
  var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
- var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(T(p.tab))+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br><br><br><b>'+esc(AG(p.r_agent)||(ME&&(ME.full_name||ME.login))||"")+'</b></div></div></div>';
+ var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° <b>"+esc(p.r_pc)+"</b>"+(p.r_c1?", contact <b>"+esc(p.r_c1)+"</b>":"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table <b>"+esc(T(p.tab))+"</b>), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br><br><br><b>'+esc(AG(p.r_agent)||(ME&&(ME.full_name||ME.login))||"")+'</b></div></div></div>';
  $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
 function rap(T,f,e){LOG(T+" imprimé","du "+fd(f)+" au "+fd(e));
  var n=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&p.r_date>=f&&p.r_date<=e}).length,d=new Date();
