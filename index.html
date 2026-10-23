@@ -85,9 +85,9 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <div id="v-d">
 <div class="stats"><div class="stat"><b id="s0">0</b><span>Diplômes (session choisie)</span></div><div class="stat w"><b id="s1">0</b><span>Disponibles</span></div><div class="stat"><b id="s2">0</b><span>Retirés</span></div><div class="stat y"><b id="s4">0</b><span>Retour à la DECO</span></div><div class="stat"><b id="s3">0 %</b><span>Taux de retrait</span><div class="pg"><i id="sp"></i></div></div></div>
 <section class="card" id="rec" hidden><h3 class="ct" style="margin-top:0">3 derniers diplômes retirés</h3><div id="recl"></div></section>
-<details class="card" id="addc" hidden><summary>+ Ajouter un diplômé</summary>
+<details class="card" id="addc" hidden><summary>+ Ajouter un diplôme</summary>
 <div class="grid"><div><label for="ys">Session (année)</label><input id="ys" inputmode="numeric" maxlength="4"></div><div><label for="tab">N° de table (obligatoire)</label><input id="tab"></div><div><label for="nom">Nom et prénoms</label><input id="nom"></div><div><label for="nai">Date et lieu de naissance</label><input id="nai" placeholder="30/12/1975 A SOUBRE"></div></div>
-<p class="err" id="err" role="alert"></p><button id="add">Enregistrer le diplômé</button></details>
+<p class="err" id="err" role="alert"></p><button id="add">Enregistrer le diplôme</button></details>
 <section class="card"><div class="bar">
 <div><label for="ses">Session</label><select id="ses"></select></div>
 <div class="f"><label for="q">Rechercher par n° de table</label><input id="q" type="search" placeholder="N° de table" inputmode="numeric"></div>
@@ -339,7 +339,7 @@ $("file").onchange=async function(){var inp=this,f=inp.files[0];if(!f)return;
   toast("Import en cours, patientez...");var add=0;
   for(var i=0;i<R.length;i+=500){var q=await sb.from("diplomes").upsert(R.slice(i,i+500),{onConflict:"ses,tab",ignoreDuplicates:true}).select("id");if(q.error)throw q.error;add+=q.data.length}
   LOG("Import Excel",add+" ajouté(s) sur "+R.length+" ligne(s), "+sh+" session(s), "+noTab+" sans n° de table ignoré(s)");
-  await refresh();alert(add+" diplômé(s) ajouté(s) ("+sh+" session(s)). "+(R.length-add)+" déjà présent(s) ignoré(s). "+noTab+" ligne(s) sans n° de table ignorée(s).");
+  await refresh();alert(add+" diplôme(s) ajouté(s) ("+sh+" session(s)). "+(R.length-add)+" déjà présent(s) ignoré(s). "+noTab+" ligne(s) sans n° de table ignorée(s).");
  }catch(e){ERR(e)}inp.value=""};
 $("exp").onclick=function(){if(!window.XLSX){toast("Export Excel indisponible (connexion internet).",true);return}
  var wb=XLSX.utils.book_new();
