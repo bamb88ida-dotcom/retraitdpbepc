@@ -145,6 +145,7 @@ function fd(s){return /^\d{4}-\d\d-\d\d$/.test(s||"")?s.split("-").reverse().joi
 function pct(a,b){return b?Math.round(a*100/b):0}
 function T(v){return String(v==null?"":v).replace(/\s+/g,"")}
 function AG(v){return NM[v]||v||""}
+function nk2(s){return sn(s).replace(/[^a-z ]/g," ").split(/\s+/).filter(Boolean).sort().join(" ")}
 function nl(s){return String(s||"").toLowerCase().replace(/\s+/g,"")}
 function mail(l){return l+"@grdbepc.app"}
 function lday(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
@@ -305,7 +306,7 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=T($("e_tab").value),nm
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
 function print(p){LOG("Impression de la décharge",p.nom+" (session "+p.ses+", table "+T(p.tab)+")");
  var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
- var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° <b>"+esc(p.r_pc)+"</b>"+(p.r_c1?", contact <b>"+esc(p.r_c1)+"</b>":"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table <b>"+esc(T(p.tab))+"</b>), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br><br><br><b>'+esc(AG(p.r_agent)||(ME&&(ME.full_name||ME.login))||"")+'</b></div></div></div>';
+ var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° <b>"+esc(p.r_pc)+"</b>"+(p.r_c1?", contact <b>"+esc(p.r_c1)+"</b>":"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de "+(nk2(p.r_par)===nk2(p.nom)?"moi-même":"<b>"+esc(p.nom)+"</b>")+" (n° de table <b>"+esc(T(p.tab))+"</b>), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br><br><br><b>'+esc(AG(p.r_agent)||(ME&&(ME.full_name||ME.login))||"")+'</b></div></div></div>';
  $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
 function rap(T,f,e){LOG(T+" imprimé","du "+fd(f)+" au "+fd(e));
  var n=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&p.r_date>=f&&p.r_date<=e}).length,d=new Date();
