@@ -80,7 +80,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <div id="ln" style="margin-top:10px" hidden><label for="lnn">Nom et prénoms</label><input id="lnn"></div></div>
 <p class="err" id="lerr" role="alert"></p><button id="lb" style="width:100%" hidden></button></section></main>
 <main id="app" hidden>
-<nav id="tabs"><button data-v="d">Diplômes</button><button data-v="b">Bilans</button><button data-v="x" id="tx" data-chef hidden>Doublons</button><button data-v="u" data-adm hidden>Comptes</button><button data-v="j" data-adm hidden>Journal</button></nav>
+<nav id="tabs"><button data-v="d">Diplômes</button><button data-v="b">Bilans</button><button data-v="x" id="tx" data-chef hidden>Doublons</button><button data-v="a" data-chefonly hidden>Autorisations</button><button data-v="u" data-adm hidden>Comptes</button><button data-v="j" data-adm hidden>Journal</button></nav>
 <div id="v-s" hidden><section class="card"><strong style="font-size:1.15rem">Consultation d'un diplôme</strong><div style="margin-top:12px"><label for="sq">N° de table</label><input id="sq" style="font-size:1.1rem" placeholder="Ex. 23 43 02 285" autocomplete="off" inputmode="numeric"></div><div id="sr" style="margin-top:14px"></div></section></div>
 <div id="v-d">
 <div class="stats"><div class="stat"><b id="s0">0</b><span>Diplômes (session choisie)</span></div><div class="stat w"><b id="s1">0</b><span>Disponibles</span></div><div class="stat"><b id="s2">0</b><span>Retirés</span></div><div class="stat y"><b id="s4">0</b><span>Retour à la DECO</span></div><div class="stat"><b id="s3">0 %</b><span>Taux de retrait</span><div class="pg"><i id="sp"></i></div></div></div>
@@ -111,6 +111,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="nrem" style="width:auto"> Agent autorisé à remettre les diplômes</label>
 <p class="err" id="ue" role="alert"></p><button id="ua">Créer le compte</button></section>
 <section class="card"><strong>Comptes existants</strong><div class="tw" style="margin-top:8px"><table style="min-width:600px"><thead><tr><th>Identifiant</th><th>Nom et prénoms</th><th>Rôle</th><th>Remise</th><th>Accès</th><th></th></tr></thead><tbody id="ulist"></tbody></table></div></section></div>
+<div id="v-a" hidden><section class="card"><strong>Agents autorisés à remettre les diplômes</strong><p style="color:var(--mute);margin:4px 0 12px">Autorisez ou retirez l'autorisation de remise pour chaque agent.</p><div class="tw" style="max-height:none"><table style="min-width:420px"><thead><tr><th>Nom et prénoms</th><th>Autorisation</th><th></th></tr></thead><tbody id="alist"></tbody></table></div></section></div>
 <div id="v-j" hidden><section class="card"><div class="bar"><div class="f"><label for="jq">Rechercher dans le journal</label><input id="jq" type="search" placeholder="Nom, agent, action..."></div><button class="g" id="jx">Exporter tout le journal</button></div><div class="tw"><table><thead><tr><th>Date et heure</th><th>Utilisateur</th><th>Action</th><th>Détail</th></tr></thead><tbody id="jb"></tbody></table></div></section></div>
 </main>
 <dialog id="dlg"><div><strong id="dt">Remise du diplôme</strong>
@@ -121,7 +122,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <p class="err" id="err2" role="alert"></p>
 <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="g" id="no">Annuler</button><button type="button" id="ok">Confirmer et imprimer la décharge</button></div></div></dialog>
 <dialog id="ed"><div><strong id="et"></strong>
-<div class="g2"><div><label for="e_tab">N° de table</label><input id="e_tab"></div><div><label for="e_k">Reste</label><input id="e_k"></div></div>
+<div style="margin-top:10px"><label for="e_tab">N° de table</label><input id="e_tab"></div>
 <div style="margin-top:10px"><label for="e_nom">Nom et prénoms</label><input id="e_nom"></div>
 <div style="margin-top:10px"><label for="e_nai">Date et lieu de naissance</label><input id="e_nai"></div>
 <div id="e_r"><h3 style="margin:14px 0 4px">Retrait</h3>
@@ -161,6 +162,7 @@ async function LOG(a,d){try{await sb.from("journal").insert({usr:ME.login,action
 async function loadAll(t){var a=[],f=0;for(;;){var r=await sb.from(t).select("*").order("id").range(f,f+999);if(r.error)throw r.error;a=a.concat(r.data);if(r.data.length<1000)break;f+=1000}return a}
 async function load(){
  var d=await loadAll("diplomes");d.sort(function(a,b){return a.nom.localeCompare(b.nom,"fr")});D=d;LOADED=true;
+ if(CHEF()){var pc=await sb.from("profiles").select("id,login,full_name,role,can_remit,active").eq("role","agent").order("login");if(!pc.error)P=pc.data}
  if(ADM()){var p=await sb.from("profiles").select("*").order("login");if(!p.error)P=p.data;
   var j=await sb.from("journal").select("*").order("at",{ascending:false}).limit(3000);if(!j.error)L=j.data}
  render()}
@@ -200,7 +202,7 @@ function perHtml(){var f=$("bf").value,e=$("bt").value;
  var R=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&(!f||p.r_date>=f)&&(!e||p.r_date<=e)}).sort(function(a,b){return a.r_date<b.r_date?1:-1});
  var ag={};R.forEach(function(p){var k=p.r_agent||"Non renseigné (import)";ag[k]=(ag[k]||0)+1});
  var h='<p style="margin:0 0 12px"><b style="font-size:1.6rem">'+R.length+"</b> retrait(s) du "+fd(f)+" au "+fd(e)+"</p>";
- if(R.length){h+='<div class="tw" style="max-height:none"><table style="min-width:0"><thead><tr><th>Agent</th><th>Retraits</th></tr></thead><tbody>'+Object.keys(ag).map(function(k){return"<tr><td>"+esc(k)+"</td><td>"+ag[k]+"</td></tr>"}).join("")+'</tbody></table></div><div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Session</th><th>Nom et prénoms</th><th>Effectué par</th></tr></thead><tbody>'+R.slice(0,150).map(function(p){return"<tr><td>"+fd(p.r_date)+"</td><td>"+esc(p.ses)+"</td><td>"+esc(p.nom)+"</td><td>"+esc(p.r_par)+"</td></tr>"}).join("")+"</tbody></table></div>"+(R.length>150?"<p>150 premiers sur "+R.length+".</p>":"")}
+ if(R.length){h+='<div class="tw" style="max-height:none"><table style="min-width:0"><thead><tr><th>Agent</th><th>Retraits</th></tr></thead><tbody>'+Object.keys(ag).map(function(k){return"<tr><td>"+esc(k)+"</td><td>"+ag[k]+"</td></tr>"}).join("")+'</tbody></table></div><div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Session</th><th>Nom et prénoms</th><th>Effectué par</th><th>Agent</th></tr></thead><tbody>'+R.slice(0,150).map(function(p){return"<tr><td>"+fd(p.r_date)+"</td><td>"+esc(p.ses)+"</td><td>"+esc(p.nom)+"</td><td>"+esc(p.r_par)+"</td><td>"+esc(p.r_agent)+"</td></tr>"}).join("")+"</tbody></table></div>"+(R.length>150?"<p>150 premiers sur "+R.length+".</p>":"")}
  return h}
 function moHtml(){var mo={};D.forEach(function(p){if(/^\d{4}-\d\d/.test(p.r_date||"")){var k=p.r_date.slice(0,7);mo[k]=(mo[k]||0)+1}});
  var ks=Object.keys(mo).sort().reverse().slice(0,12),mx=0;ks.forEach(function(k){if(mo[k]>mx)mx=mo[k]});
@@ -212,6 +214,10 @@ function rB(){if(!$("rw").value){$("rw").value=lday(new Date());$("rm").value=ld
 function rX(){var g=dups();$("dup").innerHTML=g.length?g.map(function(a){return'<div class="tw" style="margin-bottom:14px;max-height:none"><table style="min-width:700px"><tbody>'+a.map(function(p){return rowHtml(p,false)}).join("")+"</tbody></table></div>"}).join(""):'<p style="color:var(--mute)">Aucun doublon détecté.</p>'}
 function rU(){$("ulist").innerHTML=P.map(function(x){var me=ME&&x.id===ME.id;
  return"<tr><td>"+esc(x.login)+(me?" (vous)":"")+"</td><td>"+esc(x.full_name)+"</td><td>"+(x.role==="admin"?"Administrateur":x.role==="chef"?"Chef de service":"Agent")+"</td><td>"+(x.role==="admin"?"Oui":(x.role==="agent"&&x.can_remit?"Autorisée":"Non"))+'</td><td><span class="tag '+(x.active?"t1":"t0")+'">'+(x.active?"Actif":"Désactivé")+"</span></td><td style='white-space:nowrap'>"+"<button class='g sm' data-u='n' data-i='"+x.id+"'>Nom</button> "+(x.role==="agent"?"<button class='g sm' data-u='r' data-i='"+x.id+"'>"+(x.can_remit?"Retirer la remise":"Autoriser la remise")+"</button> ":"")+(me?"":"<button class='g sm' data-u='p' data-i='"+x.id+"'>Nouveau mot de passe</button> <button class='g sm' data-u='a' data-i='"+x.id+"'>"+(x.active?"Désactiver":"Réactiver")+"</button> <button class='g sm' data-u='s' data-i='"+x.id+"'>Supprimer</button>")+"</td></tr>"}).join("")}
+function rA(){var l=P.filter(function(x){return x.role==="agent"&&x.active});
+ $("alist").innerHTML=l.length?l.map(function(x){return"<tr><td><b>"+esc(x.full_name||x.login)+'</b></td><td><span class="tag '+(x.can_remit?"av":"t0")+'">'+(x.can_remit?"Autorisé":"Non autorisé")+'</span></td><td><button class="'+(x.can_remit?"g ":"")+'sm" data-i="'+x.id+'">'+(x.can_remit?"Retirer l'autorisation":"Autoriser le retrait")+"</button></td></tr>"}).join(""):'<tr><td colspan="3" style="color:var(--mute)">Aucun agent.</td></tr>'}
+$("alist").onclick=async function(e){var id=e.target.getAttribute("data-i");if(!id)return;var x=P.filter(function(u){return u.id===id})[0];if(!x)return;
+ var r=await sb.rpc("set_remit",{p_id:id,p_val:!x.can_remit});if(r.error){ERR(r.error);return}await refresh();toast("Autorisation mise à jour.")};
 var JN=300,lastQ="",lt=null;
 function logSearch(q,n){if(q===lastQ)return;clearTimeout(lt);lt=setTimeout(function(){lastQ=q;LOG("Recherche","N° de table « "+q+" » : "+n+" résultat(s)")},1500)}
 $("jb").onclick=function(e){if(e.target.id==="jm"){JN+=300;rJ()}};
@@ -231,14 +237,14 @@ function rS(){if(!LOADED){$("sr").innerHTML='<p style="color:var(--mute)">Charge
   return'<div class="ln"><b>'+esc(p.nom)+'</b><span>Session '+esc(p.ses)+'</span><span class="tn">N° '+esc(T(p.tab))+"</span>"+stTag(p)+(CAN()?(x?' <button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":' <button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+"</div>"}).join("")+(r.length>10?'<p style="color:var(--mute)">10 premiers résultats sur '+r.length+". Précisez le n° de table.</p>":""):'<p style="color:var(--mute)">Aucun diplôme enregistré pour cette recherche</p>'}
 $("sq").oninput=function(){this.value=T(this.value);rS()};
 function render(){
- if(SIMPLE()){$("tabs").hidden=true;["d","b","x","u","j"].forEach(function(v){$("v-"+v).hidden=true});$("v-s").hidden=false;rS();return}
+ if(SIMPLE()){$("tabs").hidden=true;["d","b","x","u","j","a"].forEach(function(v){$("v-"+v).hidden=true});$("v-s").hidden=false;rS();return}
  $("tabs").hidden=false;$("v-s").hidden=true;
- if(!ADM()&&(TAB==="j"||TAB==="u"||(TAB==="x"&&!CHEF())))TAB="d";
+ if(!ADM()&&(TAB==="j"||TAB==="u"||(TAB==="x"&&!CHEF())||(TAB==="a"&&!CHEF())))TAB="d";
  var dn=(ADM()||CHEF())?dups().length:0;$("tx").textContent="Doublons"+(dn?" ("+dn+")":"");
- Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){var v=b.getAttribute("data-v");b.className=v===TAB?"on":"";if(b.hasAttribute("data-adm"))b.hidden=!ADM();if(b.hasAttribute("data-chef"))b.hidden=!(ADM()||CHEF())});
- ["d","b","x","u","j"].forEach(function(v){$("v-"+v).hidden=v!==TAB});
- $("addc").hidden=!ADM();$("imp").hidden=!ADM();$("exp").hidden=!ADM();
- if(TAB==="d")rD();else if(TAB==="b")rB();else if(TAB==="x")rX();else if(TAB==="u")rU();else rJ();
+ Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){var v=b.getAttribute("data-v");b.className=v===TAB?"on":"";if(b.hasAttribute("data-adm"))b.hidden=!ADM();if(b.hasAttribute("data-chef"))b.hidden=!(ADM()||CHEF());if(b.hasAttribute("data-chefonly"))b.hidden=!CHEF()});
+ ["d","b","x","u","j","a"].forEach(function(v){$("v-"+v).hidden=v!==TAB});
+ $("addc").hidden=!MGR();$("imp").hidden=!ADM();$("exp").hidden=!ADM();
+ if(TAB==="d")rD();else if(TAB==="b")rB();else if(TAB==="x")rX();else if(TAB==="u")rU();else if(TAB==="a")rA();else rJ();
 }
 $("tabs").onclick=function(e){var v=e.target.getAttribute("data-v");if(v){TAB=v;render()}};
 $("ses").onchange=function(){SEL=this.value;render()};
@@ -257,7 +263,7 @@ $("add").onclick=async function(){
  if(r.error){E.textContent=r.error.code==="23505"?"Ce n° de table existe déjà dans cette session.":r.error.message;return}
  E.textContent="";LOG("Ajout",nm+" (session "+y+", table "+t+")");
  ["tab","nom","nai"].forEach(function(i){$(i).value=""});SEL=y;await refresh();$("tab").focus()};
-function openEdit(p){cur=p;$("et").textContent="Modifier : "+p.nom+" ("+p.ses+")";$("e_tab").value=T(p.tab);$("e_k").value=p.reste||"";$("e_nom").value=p.nom;$("e_nai").value=p.nai||"";
+function openEdit(p){cur=p;$("et").textContent="Modifier : "+p.nom+" ("+p.ses+")";$("e_tab").value=T(p.tab);$("e_nom").value=p.nom;$("e_nai").value=p.nai||"";
  var r=isR(p);$("e_r").hidden=!r;$("e_deco").value=/^\d{4}-\d\d-\d\d$/.test(p.deco_date||"")?p.deco_date:"";if(r){$("e_dat").value=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?p.r_date:"";$("e_par").value=p.r_par||"";$("e_pc").value=p.r_pc||"";$("e_c1").value=p.r_c1||"";$("e_c2").value=p.r_c2||""}
  $("err3").textContent="";$("ed").showModal()}
 async function act(e){
@@ -287,7 +293,7 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=T($("e_tab").value),nm
  if(!t||!nm){E.textContent="Le n° de table et le nom sont obligatoires.";return}
  if(r&&(!$("e_dat").value||!norm($("e_par").value)||!norm($("e_pc").value))){E.textContent="Indiquez la date, la personne qui retire et le n° de pièce.";return}
  if(r&&$("e_deco").value){E.textContent="Un diplôme retiré ne peut pas être marqué « Retour à la DECO ».";return}
- var u={tab:t,nom:nm,nai:norm($("e_nai").value),reste:norm($("e_k").value),deco_date:nul($("e_deco").value)};
+ var u={tab:t,nom:nm,nai:norm($("e_nai").value),deco_date:nul($("e_deco").value)};
  if(r){u.r_date=$("e_dat").value;u.r_par=norm($("e_par").value);u.r_pc=norm($("e_pc").value);u.r_c1=nul($("e_c1").value);u.r_c2=nul($("e_c2").value)}
  var ch=[],lab={tab:"N° de table",nom:"Nom",nai:"Naissance",reste:"Reste",r_date:"Date de retrait",r_par:"Effectué par",r_pc:"N° de pièce",r_c1:"Contact 1",r_c2:"Contact 2",deco_date:"Retour DECO"};
  Object.keys(u).forEach(function(k){var o=norm(p[k]),n=norm(u[k]);if(o!==n)ch.push(lab[k]+" : "+(o||"vide")+" → "+(n||"vide"))});
@@ -359,10 +365,16 @@ async function resetPw(x){var p=prompt("Nouveau mot de passe pour « "+x.login+"
  if(p.length<6){toast("Mot de passe trop court.",true);return}
  var r=await sb.rpc("admin_set_password",{p_id:x.id,p_pw:p});if(r.error){ERR(r.error);return}
  alert("Le mot de passe de « "+x.login+" » est maintenant :\n\n"+p+"\n\nNotez-le et remettez-le à la personne. Elle pourra le changer avec « Mon mot de passe ».")}
+var IDLE=1800000,lastW=0;
+function touchAct(){try{localStorage.setItem("grd-act",String(Date.now()))}catch(e){}}
+["mousemove","mousedown","keydown","touchstart","scroll","click"].forEach(function(ev){window.addEventListener(ev,function(){var n=Date.now();if(ME&&n-lastW>5000){lastW=n;touchAct()}},{passive:true})});
+async function autoLogout(){clearInterval(iv);await LOG("Déconnexion automatique","30 minutes d'inactivité");await sb.auth.signOut();D=[];P=[];L=[];ME=null;LOADED=false;try{localStorage.removeItem("grd-act")}catch(e){}$("app").hidden=true;$("ub").hidden=true;await toLogin("Session fermée après 30 minutes d'inactivité. Reconnectez-vous.")}
+function idleCheck(){if(!ME)return;var a=+localStorage.getItem("grd-act")||Date.now();if(Date.now()-a>IDLE)autoLogout()}
+setInterval(idleCheck,30000);document.addEventListener("visibilitychange",function(){if(!document.hidden)idleCheck()});
 $("rf").onclick=function(){refresh();toast("Données actualisées.")};
 $("pw").onclick=async function(){var p=prompt("Nouveau mot de passe (6 caractères minimum) :");if(!p)return;if(p.length<6){toast("Mot de passe trop court.",true);return}
  var r=await sb.auth.updateUser({password:p});if(r.error)ERR(r.error);else{toast("Mot de passe modifié.");LOG("Changement de son mot de passe","")}};
-$("lo").onclick=async function(){clearInterval(iv);await LOG("Déconnexion","");await sb.auth.signOut();D=[];P=[];L=[];ME=null;LOADED=false;$("app").hidden=true;$("ub").hidden=true;await toLogin()};
+$("lo").onclick=async function(){clearInterval(iv);await LOG("Déconnexion","");await sb.auth.signOut();D=[];P=[];L=[];ME=null;LOADED=false;try{localStorage.removeItem("grd-act")}catch(e){}$("app").hidden=true;$("ub").hidden=true;await toLogin()};
 function showLogin(m,first,hideForm){ME=null;$("lg").hidden=false;$("app").hidden=true;$("ub").hidden=true;
  $("lt").textContent=first?"Créer le compte administrateur":"Connexion";$("lc").hidden=!first;$("ln").hidden=!first;$("lf").hidden=!!hideForm;$("lb").hidden=!!hideForm;
  $("lb").textContent=first?"Créer le compte":"Se connecter";$("lb").setAttribute("data-first",first?"1":"");$("lp").value="";$("lc2").value="";$("lerr").textContent=m||""}
@@ -374,7 +386,7 @@ async function enter(){
  if(r.error||!r.data||!r.data.active){await sb.auth.signOut();await toLogin("Ce compte n'est pas autorisé. Contactez l'administrateur.");return}
  ME=r.data;LOADED=false;SEL=null;TAB="d";setWho();render();$("lg").hidden=true;$("app").hidden=false;$("ub").hidden=false;
  setWho();
- SEL=null;TAB="d";await refresh();LOG("Connexion","");clearInterval(iv);iv=setInterval(function(){if(ME&&!document.querySelector("dialog[open]"))refresh()},60000)}
+ SEL=null;TAB="d";touchAct();await refresh();LOG("Connexion","");clearInterval(iv);iv=setInterval(function(){if(ME&&!document.querySelector("dialog[open]"))refresh()},60000)}
 $("lb").onclick=async function(){var btn=this,lg=nl($("lu").value),pw=$("lp").value,first=!!btn.getAttribute("data-first"),E=$("lerr");
  if(!lg||!pw){E.textContent="Entrez l'identifiant et le mot de passe.";return}
  if(!/^[a-z0-9._-]+$/.test(lg)){E.textContent="Identifiant : lettres, chiffres, point, tiret ou _ (sans accent ni espace).";return}
@@ -391,7 +403,7 @@ $("lb").onclick=async function(){var btn=this,lg=nl($("lu").value),pw=$("lp").va
 (async function(){
  if(!C.url||!C.key||C.url.indexOf("http")!==0||!window.supabase){showLogin("Configuration manquante : ouvrez le fichier config.js sur GitHub et collez l'adresse et la clé de votre projet Supabase.",false,true);return}
  sb=supabase.createClient(C.url,C.key);
- try{var s=(await sb.auth.getSession()).data.session;if(s)await enter();else await toLogin()}catch(e){showLogin("Connexion impossible : "+(e.message||"vérifiez internet"),false,true)}
+ try{var s=(await sb.auth.getSession()).data.session;if(s){var ac=+localStorage.getItem("grd-act");if(ac&&Date.now()-ac>IDLE){await sb.auth.signOut();await toLogin("Session fermée après 30 minutes d'inactivité. Reconnectez-vous.")}else await enter()}else await toLogin()}catch(e){showLogin("Connexion impossible : "+(e.message||"vérifiez internet"),false,true)}
 })();
 })();
 </script>
