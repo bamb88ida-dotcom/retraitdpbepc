@@ -136,7 +136,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <script src="config.js"></script>
 <script>
 (function(){
-var LOADED=false,C=window.GRD_CONFIG||{},sb=null,ME=null,D=[],P=[],L=[],TAB="d",SEL=null,cur=null,tm=null,iv=null;
+var NM={},LOADED=false,C=window.GRD_CONFIG||{},sb=null,ME=null,D=[],P=[],L=[],TAB="d",SEL=null,cur=null,tm=null,iv=null;
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function norm(s){return String(s==null?"":s).replace(/\s+/g," ").trim()}
@@ -144,6 +144,7 @@ function nul(s){s=norm(s);return s?s:null}
 function fd(s){return /^\d{4}-\d\d-\d\d$/.test(s||"")?s.split("-").reverse().join("/"):(s||"")}
 function pct(a,b){return b?Math.round(a*100/b):0}
 function T(v){return String(v==null?"":v).replace(/\s+/g,"")}
+function AG(v){return NM[v]||v||""}
 function nl(s){return String(s||"").toLowerCase().replace(/\s+/g,"")}
 function mail(l){return l+"@grdbepc.app"}
 function lday(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
@@ -161,6 +162,7 @@ function stTag(p){return isR(p)?'<span class="tag rt">Retiré'+(p.r_date?" le "+
 async function LOG(a,d){try{await sb.from("journal").insert({usr:ME.login,action:a,detail:d||""})}catch(e){}}
 async function loadAll(t){var a=[],f=0;for(;;){var r=await sb.from(t).select("*").order("id").range(f,f+999);if(r.error)throw r.error;a=a.concat(r.data);if(r.data.length<1000)break;f+=1000}return a}
 async function load(){
+ var nr=await sb.rpc("agent_names");if(!nr.error&&nr.data){NM={};nr.data.forEach(function(x){NM[x.login]=x.nom})}
  var d=await loadAll("diplomes");d.sort(function(a,b){return a.nom.localeCompare(b.nom,"fr")});D=d;LOADED=true;
  if(CHEF()){var pc=await sb.from("profiles").select("id,login,full_name,role,can_remit,active").eq("role","agent").order("login");if(!pc.error)P=pc.data}
  if(ADM()){var p=await sb.from("profiles").select("*").order("login");if(!p.error)P=p.data;
@@ -178,7 +180,7 @@ function dups(){var m={};D.forEach(function(p){var k=key(p);if(k)(m[k]=m[k]||[])
 function find(id){return D.filter(function(p){return String(p.id)===id})[0]}
 function rowHtml(p,full){var r=isR(p),adm=MGR(),can=CAN();
  return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(T(p.tab))+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+stTag(p)+"</td>"+
- (full?"<td>"+esc(p.r_par)+"</td><td>"+esc(p.r_pc)+"</td><td>"+esc(p.r_c1)+(p.r_c2?"<small>"+esc(p.r_c2)+"</small>":"")+"</td><td>"+esc(p.r_agent)+"</td>":"")+
+ (full?"<td>"+esc(p.r_par)+"</td><td>"+esc(p.r_pc)+"</td><td>"+esc(p.r_c1)+(p.r_c2?"<small>"+esc(p.r_c2)+"</small>":"")+"</td><td>"+esc(AG(p.r_agent))+"</td>":"")+
  "<td style='white-space:nowrap'>"+(full&&can?(r?'<button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":'<button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+(adm?" <button class='g sm' data-a='m' data-i='"+p.id+"'>Modifier</button>"+(full&&!r?" <button class='g sm' data-a='c' data-i='"+p.id+"'>"+(p.deco_date?"Annuler retour DECO":"Retour DECO")+"</button>":"")+(full&&r?" <button class='g sm' data-a='u' data-i='"+p.id+"'>Annuler</button>":"")+" <button class='g sm' data-a='d' data-i='"+p.id+"' aria-label='Supprimer'>×</button>":"")+"</td></tr>"}
 function rD(){
  if(!LOADED){$("body").innerHTML='<tr><td colspan="10" style="color:var(--mute)">Chargement des données...</td></tr>';return}
@@ -200,9 +202,9 @@ function sesHtml(){var l=sessions();if(!l.length)return'<p style="color:var(--mu
   return"<tr><td><b>"+y+"</b></td><td>"+b.length+"</td><td>"+r+"</td><td>"+d+"</td><td>"+(b.length-r-d)+'</td><td style="min-width:190px"><div class="sb"><i style="width:'+pct(r,b.length)+'%;background:var(--ok)"></i><i style="width:'+pct(d,b.length)+'%;background:#ffe14d"></i></div>'+pct(r,b.length)+" % retirés</td></tr>"}).join("")+"</tbody></table>"}
 function perHtml(){var f=$("bf").value,e=$("bt").value;
  var R=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&(!f||p.r_date>=f)&&(!e||p.r_date<=e)}).sort(function(a,b){return a.r_date<b.r_date?1:-1});
- var ag={};R.forEach(function(p){var k=p.r_agent||"Non renseigné (import)";ag[k]=(ag[k]||0)+1});
+ var ag={};R.forEach(function(p){var k=AG(p.r_agent)||"Non renseigné (import)";ag[k]=(ag[k]||0)+1});
  var h='<p style="margin:0 0 12px"><b style="font-size:1.6rem">'+R.length+"</b> retrait(s) du "+fd(f)+" au "+fd(e)+"</p>";
- if(R.length){h+='<div class="tw" style="max-height:none"><table style="min-width:0"><thead><tr><th>Agent</th><th>Retraits</th></tr></thead><tbody>'+Object.keys(ag).map(function(k){return"<tr><td>"+esc(k)+"</td><td>"+ag[k]+"</td></tr>"}).join("")+'</tbody></table></div><div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Session</th><th>Nom et prénoms</th><th>Effectué par</th><th>Agent</th></tr></thead><tbody>'+R.slice(0,150).map(function(p){return"<tr><td>"+fd(p.r_date)+"</td><td>"+esc(p.ses)+"</td><td>"+esc(p.nom)+"</td><td>"+esc(p.r_par)+"</td><td>"+esc(p.r_agent)+"</td></tr>"}).join("")+"</tbody></table></div>"+(R.length>150?"<p>150 premiers sur "+R.length+".</p>":"")}
+ if(R.length){h+='<div class="tw" style="max-height:none"><table style="min-width:0"><thead><tr><th>Agent</th><th>Retraits</th></tr></thead><tbody>'+Object.keys(ag).map(function(k){return"<tr><td>"+esc(k)+"</td><td>"+ag[k]+"</td></tr>"}).join("")+'</tbody></table></div><div class="tw" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Session</th><th>Nom et prénoms</th><th>Effectué par</th><th>Agent</th></tr></thead><tbody>'+R.slice(0,150).map(function(p){return"<tr><td>"+fd(p.r_date)+"</td><td>"+esc(p.ses)+"</td><td>"+esc(p.nom)+"</td><td>"+esc(p.r_par)+"</td><td>"+esc(AG(p.r_agent))+"</td></tr>"}).join("")+"</tbody></table></div>"+(R.length>150?"<p>150 premiers sur "+R.length+".</p>":"")}
  return h}
 function moHtml(){var mo={};D.forEach(function(p){if(/^\d{4}-\d\d/.test(p.r_date||"")){var k=p.r_date.slice(0,7);mo[k]=(mo[k]||0)+1}});
  var ks=Object.keys(mo).sort().reverse().slice(0,12),mx=0;ks.forEach(function(k){if(mo[k]>mx)mx=mo[k]});
@@ -303,7 +305,7 @@ $("ok3").onclick=async function(){var p=cur,E=$("err3"),t=T($("e_tab").value),nm
  LOG("Modification",p.nom+" (session "+p.ses+") — "+ch.join(" ; "));$("ed").close();await refresh()};
 function print(p){LOG("Impression de la décharge",p.nom+" (session "+p.ses+", table "+T(p.tab)+")");
  var d=new Date(),dj=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear(),dt=/^\d{4}-\d\d-\d\d$/.test(p.r_date||"")?fd(p.r_date):dj;
- var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(T(p.tab))+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br>(signature et cachet)<br><br><b>'+esc(p.r_agent||(ME&&ME.login)||"")+'</b></div></div></div>';
+ var h='<div class="dech"><div class="top">Soubré, le '+dt+'</div><h2>Décharge de retrait de diplôme du BEPC</h2><p>Je soussigné(e) <b>'+esc(p.r_par)+"</b>, titulaire de la pièce n° "+esc(p.r_pc)+(p.r_c1?", contact "+esc(p.r_c1):"")+", reconnais avoir reçu le diplôme du BEPC, session "+esc(p.ses)+", de <b>"+esc(p.nom)+"</b> (n° de table "+esc(T(p.tab))+"), le "+dt+'.</p><div class="sig"><div>Le bénéficiaire<br><br>(signature)</div><div>L\'Agent SECO<br><br>(signature et cachet)<br><br><b>'+esc(AG(p.r_agent)||(ME&&(ME.full_name||ME.login))||"")+'</b></div></div></div>';
  $("pr").innerHTML=h+'<div class="cut"></div>'+h;window.print()}
 function rap(T,f,e){LOG(T+" imprimé","du "+fd(f)+" au "+fd(e));
  var n=D.filter(function(p){return /^\d{4}-/.test(p.r_date||"")&&p.r_date>=f&&p.r_date<=e}).length,d=new Date();
@@ -335,7 +337,7 @@ $("file").onchange=async function(){var inp=this,f=inp.files[0];if(!f)return;
 $("exp").onclick=function(){if(!window.XLSX){toast("Export Excel indisponible (connexion internet).",true);return}
  var wb=XLSX.utils.book_new();
  sessions().reverse().forEach(function(y){var rows=[["N° DE TABLE","NOM ET PRENOMS","DATE ET LIEU DE NAISSANCE","RESTE","DATE DE RETRAIT","EFFECTUE PAR","N° DE PIECE","CONTACT 1","CONTACT 2","ENREGISTRE PAR","RETOUR DECO"]];
-  D.filter(function(p){return p.ses===y}).forEach(function(p){rows.push([T(p.tab),p.nom,p.nai||"",p.reste||"",fd(p.r_date),p.r_par||"",p.r_pc||"",p.r_c1||"",p.r_c2||"",p.r_agent||"",p.deco_date?fd(p.deco_date):""])});
+  D.filter(function(p){return p.ses===y}).forEach(function(p){rows.push([T(p.tab),p.nom,p.nai||"",p.reste||"",fd(p.r_date),p.r_par||"",p.r_pc||"",p.r_c1||"",p.r_c2||"",AG(p.r_agent),p.deco_date?fd(p.deco_date):""])});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"SESSION "+y)});
  if(!wb.SheetNames.length){toast("Rien à exporter.",true);return}
  XLSX.writeFile(wb,"RETRAITS_BEPC.xlsx");LOG("Export Excel","")};
