@@ -12,9 +12,9 @@
 @media (prefers-color-scheme:dark){:root{--bg:#0c1714;--card:#14241f;--ink:#e7f1ed;--mute:#9bb2aa;--line:#26403a;--acc:#46c4a3;--onacc:#06241c;--acc2:#1b332c;--ok:#46c4a3;--warn:#f0b36a;--bad:#ff8a80;--sh:none}}
 *{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,"Segoe UI",Roboto,sans-serif}
-header{background:linear-gradient(135deg,#0e4a3b,#17806a);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header{background:linear-gradient(135deg,#0e4a3b,#17806a);color:#fff;padding:14px 1vw;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 header h1{margin:0;font-size:1.2rem}header p{margin:0;opacity:.85;font-size:.85rem}
-main{max-width:1150px;margin:0 auto;padding:16px}
+main{max-width:none;margin:0 auto;padding:14px 1vw}
 nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 nav button{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:var(--sh)}
 nav button.on{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
@@ -33,9 +33,9 @@ button.g{background:transparent;color:var(--ink);border:1px solid var(--line)}
 button.sm{padding:5px 9px;font-size:.82rem}
 .hb{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.4)}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:end}.bar .f{flex:1;min-width:200px}
-.tw{overflow:auto;max-height:68vh;border-radius:8px}
-table{width:100%;border-collapse:collapse;min-width:900px}
-th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tw{overflow:auto;max-height:82vh;border-radius:8px}
+table{width:100%;border-collapse:collapse;min-width:0;font-size:.92rem}@media (max-width:1100px){table{min-width:1000px}}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:.78rem;color:var(--mute);text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0;background:var(--card)}
 tbody tr:hover{background:var(--acc2)}
 td small{display:block;color:var(--mute)}
@@ -44,7 +44,7 @@ td small{display:block;color:var(--mute)}
 .pg{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:4px 0}.pg i{display:block;height:100%;background:var(--acc)}
 .err{color:var(--bad);min-height:1.2em;margin:8px 0 0;font-size:.875rem}
 h3{margin:18px 0 8px}
-dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:480px;width:92%}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);max-width:620px;width:94%}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 #pr{display:none}
 @media print{:root{--bg:#fff;--card:#fff;--ink:#000;--mute:#444;--line:#999;--acc:#17806a;--sh:none}body>*:not(#pr){display:none!important}#pr{display:block;padding:24px;color:#000;background:#fff;font:14px/1.6 "Times New Roman",Times,serif;font-variant-numeric:lining-nums}#pr h2{text-align:center}.sig{display:flex;justify-content:space-between;margin-top:60px}.tw{max-height:none;overflow:visible}table{min-width:0;font-size:12px}th{position:static}}
@@ -84,6 +84,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 <div id="v-s" hidden><section class="card"><strong style="font-size:1.15rem">Consultation d'un diplôme</strong><div style="margin-top:12px"><label for="sq">N° de table</label><input id="sq" style="font-size:1.1rem" placeholder="Ex. 23 43 02 285" autocomplete="off" inputmode="numeric"></div><div id="sr" style="margin-top:14px"></div></section></div>
 <div id="v-d">
 <div class="stats"><div class="stat"><b id="s0">0</b><span>Diplômes (session choisie)</span></div><div class="stat w"><b id="s1">0</b><span>Disponibles</span></div><div class="stat"><b id="s2">0</b><span>Retirés</span></div><div class="stat y"><b id="s4">0</b><span>Retour à la DECO</span></div><div class="stat"><b id="s3">0 %</b><span>Taux de retrait</span><div class="pg"><i id="sp"></i></div></div></div>
+<section class="card" id="rec" hidden><h3 class="ct" style="margin-top:0">5 derniers diplômes retirés</h3><div id="recl"></div></section>
 <details class="card" id="addc" hidden><summary>+ Ajouter un diplômé</summary>
 <div class="grid"><div><label for="ys">Session (année)</label><input id="ys" inputmode="numeric" maxlength="4"></div><div><label for="tab">N° de table (obligatoire)</label><input id="tab"></div><div><label for="nom">Nom et prénoms</label><input id="nom"></div><div><label for="nai">Date et lieu de naissance</label><input id="nai" placeholder="30/12/1975 A SOUBRE"></div></div>
 <p class="err" id="err" role="alert"></p><button id="add">Enregistrer le diplômé</button></details>
@@ -183,9 +184,14 @@ function rowHtml(p,full){var r=isR(p),adm=MGR(),can=CAN();
  return "<tr><td>"+esc(p.ses)+'</td><td class="tn">'+esc(T(p.tab))+"</td><td>"+esc(p.nom)+(p.reste?"<small>Reste : "+esc(p.reste)+"</small>":"")+"</td><td>"+esc(p.nai)+"</td><td>"+stTag(p)+"</td>"+
  (full?"<td>"+esc(p.r_par)+"</td><td>"+esc(p.r_pc)+"</td><td>"+esc(p.r_c1)+(p.r_c2?"<small>"+esc(p.r_c2)+"</small>":"")+"</td><td>"+esc(AG(p.r_agent))+"</td>":"")+
  "<td style='white-space:nowrap'>"+(full&&can?(r?'<button class="g sm" data-a="p" data-i="'+p.id+'">Décharge</button>':(p.deco_date?"":'<button class="sm" data-a="r" data-i="'+p.id+'">Remettre</button>')):"")+(adm?" <button class='g sm' data-a='m' data-i='"+p.id+"'>Modifier</button>"+(full&&!r?" <button class='g sm' data-a='c' data-i='"+p.id+"'>"+(p.deco_date?"Annuler retour DECO":"Retour DECO")+"</button>":"")+(full&&r?" <button class='g sm' data-a='u' data-i='"+p.id+"'>Annuler</button>":"")+" <button class='g sm' data-a='d' data-i='"+p.id+"' aria-label='Supprimer'>×</button>":"")+"</td></tr>"}
+function rRec(){
+  var l=D.filter(function(p){return isR(p)&&/^\d{4}-/.test(p.r_date||"")}).sort(function(a,b){var x=a.r_date+"|"+(a.r_at||""),y=b.r_date+"|"+(b.r_at||"");return x<y?1:x>y?-1:0}).slice(0,5);
+  $("rec").hidden=!l.length;
+  $("recl").innerHTML=l.map(function(p){var a=AG(p.r_agent);return '<div class="ln"><b>'+esc(p.nom)+'</b><span class="tn">'+esc(T(p.tab))+'</span><span>Session '+esc(p.ses)+'</span><span>Retiré le '+esc(fd(p.r_date))+(p.r_par?' par '+esc(p.r_par):'')+'</span>'+(a?'<span style="color:var(--mute)">Traité par '+esc(a)+'</span>':'')+'</div>'}).join("");
+}
 function rD(){
  if(!LOADED){$("body").innerHTML='<tr><td colspan="10" style="color:var(--mute)">Chargement des données...</td></tr>';return}
- fillSes();
+ fillSes();rRec();
  var q=T($("q").value).toLowerCase(),f=$("flt").value,s=$("ses").value;
  var base=D.filter(function(p){return !s||p.ses===s});
  var n=base.filter(isR).length;
